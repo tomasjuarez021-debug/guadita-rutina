@@ -3,6 +3,9 @@
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rutina Integral Guadalupe Ruiz">
 <title>Rutina Integral Guadalupe Ruiz</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -561,14 +564,8 @@ function renderDay(dt) {
 }
 
 function renderComp(dt, data) {
-  const gp = gymPct(dt);
   const row = document.getElementById('compRow');
   row.innerHTML = '';
-  const ok = gp===100; const inProg = gp>0&&!ok;
-  const g = document.createElement('div');
-  g.className = `comp-card auto${ok?' done':inProg?' in-prog':''}`;
-  g.innerHTML = `<div class="comp-check">${ok?'✓':''}</div><span class="comp-icon">🏋️</span><div class="comp-label">Gym</div><div class="comp-hint">${ok?'✓ Completado':'Auto al terminar'}</div>`;
-  row.appendChild(g);
 }
 
 function toggleMob(dt) {

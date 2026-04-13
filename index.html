@@ -195,6 +195,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .week-nav-sub{font-size:9px;color:var(--muted);margin-top:1px}
 .week-nav-today{font-size:9px;font-weight:700;color:var(--gold);cursor:pointer;padding:3px 9px;border:1px solid rgba(212,119,138,0.30);border-radius:10px;background:var(--gold-dim);margin-top:4px;display:inline-block}
 
+.week-strip-nav{display:flex;align-items:center;justify-content:space-between;padding:6px 0 8px;gap:8px}
+.week-strip-btn{background:none;border:1px solid var(--border2);border-radius:7px;color:var(--muted);font-size:16px;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-family:'DM Sans',sans-serif;flex-shrink:0;line-height:1}
+.week-strip-btn:hover{color:var(--gold);border-color:rgba(212,119,138,0.4)}
+.week-strip-label{flex:1;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--text);letter-spacing:0.5px}
+.week-strip-label span{font-size:9px;font-weight:500;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(212,119,138,0.25);border-radius:8px;padding:2px 7px;margin-left:7px;letter-spacing:1px;text-transform:uppercase;vertical-align:middle}
 .week-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px}
 .res-day-card{background:var(--card);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);overflow:hidden;transition:border-color 0.2s}
 .res-day-card.r-open{border-color:var(--border2)}
@@ -272,6 +277,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <div class="app-title-sub">Definición · Fuerza · Rendimiento 🌿</div>
     </div>
     <div class="today-date" id="todayDate">vie, 10 abr</div>
+  </div>
+  <div class="week-strip-nav">
+    <button class="week-strip-btn" onclick="changeMainWeek(-1)">‹</button>
+    <div class="week-strip-label" id="weekStripLabel"></div>
+    <button class="week-strip-btn" onclick="changeMainWeek(1)">›</button>
   </div>
   <div class="day-strip" id="daySelector"></div>
 </div>
@@ -466,12 +476,8 @@ function mobKey(dt) { return dateStr(dt) + '_mob'; }
 // ── Estado global ──
 let curDayDate = (function(){
   const t = getToday();
-  const weekStart = new Date(2026,3,6);
-  const weekEnd = new Date(2026,3,12);
   t.setHours(0,0,0,0);
-  weekStart.setHours(0,0,0,0);
-  weekEnd.setHours(23,59,59,999);
-  return (t >= weekStart && t <= weekEnd) ? t : new Date(2026,3,6);
+  return t;
 })();
 let resWeekOffset = 0; // semanas relativas a la semana actual (0=esta, -1=anterior, +1=siguiente)
 
@@ -507,14 +513,24 @@ function init() {
   renderDay(curDayDate);
 }
 
-// ── Day Strip: muestra fijo Lun 6 - Dom 12 abril 2026 ──
+// ── Day Strip: semana dinámica basada en curDayDate ──
 function buildDays() {
   const cont = document.getElementById('daySelector');
   cont.innerHTML = '';
   const today = getToday();
   today.setHours(0,0,0,0);
   const todayStr = dateStr(today);
-  const weekStart = new Date(2026, 3, 6); // lunes 6 abril 2026
+  // Calcula el lunes de la semana que contiene curDayDate
+  const weekStart = getMondayOf(curDayDate);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate()+6);
+
+  // Actualizar etiqueta de semana en el header
+  const lbl = document.getElementById('weekStripLabel');
+  if(lbl) {
+    const fmt = d => d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+    const isCurrentWeek = dateStr(getMondayOf(today)) === dateStr(weekStart);
+    lbl.innerHTML = fmt(weekStart) + ' — ' + fmt(weekEnd) + (isCurrentWeek ? '<span>Esta semana</span>' : '');
+  }
 
   for(let i=0; i<7; i++) {
     const dt = new Date(weekStart);
@@ -886,6 +902,17 @@ function sw(v){
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('nav-'+v).classList.add('active');
+}
+
+// Navegar semanas desde el header del strip
+function changeMainWeek(delta) {
+  const newDate = new Date(curDayDate);
+  newDate.setDate(curDayDate.getDate() + delta * 7);
+  curDayDate = newDate;
+  buildDays();
+  renderDay(curDayDate);
+  if(document.getElementById('view-postura').classList.contains('active')) renderPostura(curDayDate);
+  if(document.getElementById('view-resumen').classList.contains('active')) renderResumen();
 }
 
 init();

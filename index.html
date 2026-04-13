@@ -251,6 +251,27 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .nav-btn .nl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif}
 .view{display:none}.view.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+/* EDIT MODAL */
+.ex-dots{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:5px;color:var(--muted2);font-size:13px;letter-spacing:1px;cursor:pointer;flex-shrink:0;transition:color 0.15s,background 0.15s;line-height:1;margin-left:4px}
+.ex-dots:hover{color:var(--muted);background:var(--card3)}
+.ex-peso{font-size:10px;font-weight:600;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(212,119,138,0.22);border-radius:5px;padding:2px 7px;white-space:nowrap;flex-shrink:0}
+.edit-ov{display:none;position:fixed;inset:0;background:rgba(200,190,180,0.6);z-index:300;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.edit-ov.show{display:flex}
+.edit-modal{background:var(--card);border:1px solid var(--border2);border-radius:18px 18px 0 0;padding:22px 20px 36px;width:100%;max-width:480px;animation:slideUp 0.28s cubic-bezier(0.34,1.1,0.64,1) both}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.edit-modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.edit-modal-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:0.5px;color:var(--text)}
+.edit-close{background:var(--card2);border:1px solid var(--border2);color:var(--muted);font-size:12px;width:28px;height:28px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif}
+.edit-field{margin-bottom:14px}
+.edit-field-row{display:flex;gap:10px;margin-bottom:14px}
+.edit-field-row .edit-field{flex:1;margin-bottom:0}
+.edit-lbl{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px}
+.edit-inp{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:11px 13px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s}
+.edit-inp:focus{border-color:rgba(212,119,138,0.45)}
+.edit-actions{display:flex;gap:10px;margin-top:20px}
+.edit-btn-cancel{flex:1;padding:13px;border-radius:10px;border:1px solid var(--border2);background:var(--card2);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer}
+.edit-btn-save{flex:2;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;letter-spacing:1px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -299,6 +320,38 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   </div>
   <div class="view" id="view-postura"><div id="postContent"></div></div>
   <div class="view" id="view-resumen"><div id="resContent"></div></div>
+</div>
+
+<!-- Edit Exercise Modal -->
+<div class="edit-ov" id="editOv" onclick="closeEditIfBg(event)">
+  <div class="edit-modal">
+    <div class="edit-modal-hdr">
+      <div class="edit-modal-title">Editar ejercicio</div>
+      <button class="edit-close" onclick="closeEdit()">✕</button>
+    </div>
+    <div class="edit-field">
+      <label class="edit-lbl">Nombre</label>
+      <input class="edit-inp" id="editName" type="text" placeholder="Nombre del ejercicio"/>
+    </div>
+    <div class="edit-field-row">
+      <div class="edit-field">
+        <label class="edit-lbl">Series / Reps</label>
+        <input class="edit-inp" id="editMeta" type="text" placeholder="ej: 4 × 10 reps"/>
+      </div>
+      <div class="edit-field">
+        <label class="edit-lbl">Peso</label>
+        <input class="edit-inp" id="editPeso" type="text" placeholder="ej: 20 kg"/>
+      </div>
+    </div>
+    <div class="edit-field">
+      <label class="edit-lbl">Nota <span style="color:var(--muted2);font-weight:400">(opcional)</span></label>
+      <input class="edit-inp" id="editNote" type="text" placeholder="Tip o clave del ejercicio"/>
+    </div>
+    <div class="edit-actions">
+      <button class="edit-btn-cancel" onclick="closeEdit()">Cancelar</button>
+      <button class="edit-btn-save" onclick="saveEdit()">Guardar</button>
+    </div>
+  </div>
 </div>
 
 <div class="bottom-nav">
@@ -507,6 +560,7 @@ function totalPct(dt) {
 
 // ── Init ──
 function init() {
+  applyGymEdits();
   const today = getToday();
   document.getElementById('todayDate').textContent = today.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'});
   buildDays();
@@ -600,10 +654,12 @@ function renderSessions(dt, data) {
     const pct = Math.round(din/sess.ex.length*100);
     const ok = din===sess.ex.length;
     const dtStr = dateStr(dt);
-    const exHTML = sess.ex.map(ex => {
+    const exHTML = sess.ex.map((ex,ei) => {
       const done = !!store[gymKey(dt,ex.n)];
       const safe = ex.n.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return `<div class="ex-item${done?' done':''}" onclick="toggleGym('${safe}','${dtStr}')"><div class="ex-chk">${done?'✓':''}</div><div class="ex-det"><div class="ex-nm">${ex.n}</div><div class="ex-mt mt-${ex.t}">${ex.m}</div>${ex.note?`<div class="ex-nt nt-${ex.t}">${ex.note}</div>`:''}</div><span class="ex-tag tag-${ex.t}">${TL[ex.t]||ex.t}</span></div>`;
+      const dayDow = dt.getDay();
+      const pesoHTML = ex.peso ? `<span class="ex-peso">${ex.peso}</span>` : '';
+      return `<div class="ex-item${done?' done':''}" id="exi-${dtStr}-${si}-${ei}"><div class="ex-chk" onclick="toggleGym('${safe}','${dtStr}')">${done?'✓':''}</div><div class="ex-det" onclick="toggleGym('${safe}','${dtStr}')"><div class="ex-nm">${ex.n}</div><div class="ex-mt mt-${ex.t}">${ex.m}${ex.peso?` · <strong style="color:var(--gold)">${ex.peso}</strong>`:''}</div>${ex.note?`<div class="ex-nt nt-${ex.t}">${ex.note}</div>`:''}</div><span class="ex-tag tag-${ex.t}" onclick="toggleGym('${safe}','${dtStr}')">${TL[ex.t]||ex.t}</span><span class="ex-dots" onclick="openEdit(${dayDow},${si},${ei},event)" title="Editar">···</span></div>`;
     }).join('');
     const card = document.createElement('div');
     card.className = `session-card${si===0?' open':''}${ok?' all-done':''}`;
@@ -913,6 +969,61 @@ function changeMainWeek(delta) {
   renderDay(curDayDate);
   if(document.getElementById('view-postura').classList.contains('active')) renderPostura(curDayDate);
   if(document.getElementById('view-resumen').classList.contains('active')) renderResumen();
+}
+
+// ── Edit Exercise ──
+let editCtx = null;
+
+let gymEdits = {};
+try { gymEdits = JSON.parse(localStorage.getItem('rc_gym_edits_g') || '{}'); } catch(e){ gymEdits = {}; }
+const saveEdits = () => { try { localStorage.setItem('rc_gym_edits_g', JSON.stringify(gymEdits)); } catch(e){} };
+
+function editKey(dow, si, ei) { return `${dow}-${si}-${ei}`; }
+
+function applyGymEdits() {
+  Object.entries(gymEdits).forEach(([k, over]) => {
+    const [dow, si, ei] = k.split('-').map(Number);
+    if(GYM[dow] && GYM[dow].sessions[si] && GYM[dow].sessions[si].ex[ei]) {
+      Object.assign(GYM[dow].sessions[si].ex[ei], over);
+    }
+  });
+}
+
+function openEdit(dow, si, ei, e) {
+  e.stopPropagation();
+  editCtx = {dow, si, ei};
+  const ex = GYM[dow].sessions[si].ex[ei];
+  document.getElementById('editName').value = ex.n;
+  document.getElementById('editMeta').value = ex.m;
+  document.getElementById('editPeso').value = ex.peso || '';
+  document.getElementById('editNote').value = ex.note || '';
+  document.getElementById('editOv').classList.add('show');
+}
+
+function closeEdit() {
+  document.getElementById('editOv').classList.remove('show');
+  editCtx = null;
+}
+
+function closeEditIfBg(e) {
+  if(e.target === document.getElementById('editOv')) closeEdit();
+}
+
+function saveEdit() {
+  if(!editCtx) return;
+  const {dow, si, ei} = editCtx;
+  const k = editKey(dow, si, ei);
+  const newName = document.getElementById('editName').value.trim();
+  const newMeta = document.getElementById('editMeta').value.trim();
+  const newPeso = document.getElementById('editPeso').value.trim();
+  const newNote = document.getElementById('editNote').value.trim();
+  if(!newName) return;
+  gymEdits[k] = {n: newName, m: newMeta, peso: newPeso, note: newNote};
+  saveEdits();
+  const ex = GYM[dow].sessions[si].ex[ei];
+  ex.n = newName; ex.m = newMeta; ex.peso = newPeso; ex.note = newNote;
+  closeEdit();
+  renderSessions(curDayDate, GYM[curDayDate.getDay()]);
 }
 
 init();

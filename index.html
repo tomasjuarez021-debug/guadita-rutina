@@ -522,42 +522,43 @@ const TL={fuerza:'fuerza',volumen:'volumen',core:'core',postura:'postura',correc
 // ── RUTINA DE GIMNASIO ──
 // Cada día se organiza en bloques (sesiones) temáticos: el orden del bloque
 // es el orden real de entrenamiento.
+// ── RUTINA DE FUERZA ──
+// Se repite lunes, miércoles y viernes. Cada día recibe su propia copia,
+// así se puede editar un día sin tocar los otros.
+function rutinaFuerza(){
+  return {
+    label: 'Gambas · Fuerza de piernas',
+    tipo: 'Entrada en calor + Fuerza',
+    sessions: [
+      {
+        id:'ef_calor', type:'Pre-activación · 10 min', name:'Entrada en calor', icon:'leaf', ic:'ic-yoga',
+        ex:[
+          {n:'Soga', sets:'', reps:'5 minutos', weight:'', note:'', t:'cardio'},
+          {n:'Mobility drills', sets:'', reps:'5 min', weight:'', note:'Caderas - rodillas - tobillos', t:'correctivo'}
+        ]
+      },
+      {
+        id:'ef_gambas', type:'Gym - 19:00 hs', name:'Gambas - fuerza', icon:'dumbbell', ic:'ic-gym',
+        ex:[
+          {n:'Sentadillas con ketbell', sets:'4', reps:'20 reps', weight:'30 kg', note:'', t:'fuerza'},
+          {n:'Wall sits', sets:'4', reps:'60s', weight:'10kg', note:'', t:'fuerza'},
+          {n:'Subidas al cajon', sets:'4', reps:'20 reps', weight:'10 kg x lado', note:'', t:'fuerza'},
+          {n:'Peso muerto ketbell', sets:'4', reps:'20 reps', weight:'15 kg', note:'', t:'fuerza'},
+          {n:'Estocadas a dos piernas', sets:'', reps:'20 reps', weight:'10 kg', note:'', t:'fuerza'},
+          {n:'Sentadillas aductores', sets:'4', reps:'20 reps', weight:'15 kg', note:'', t:'fuerza'},
+          {n:'Gemelos', sets:'4', reps:'20 reps', weight:'30 kg', note:'', t:'fuerza'}
+        ]
+      }
+    ]
+  };
+}
+
 const GYM = {
   // DOMINGO — descanso
   0: null,
 
-  // LUNES — Femorales · Glúteos · Espalda
-  1: {
-    label: 'Femorales · Glúteos · Espalda',
-    tipo: 'Fuerza base · Tren inferior + Espalda',
-    sessions: [
-      {
-        id:'lun_gluteo', type:'Bloque 1 · Fuerza', name:'Femorales + Glúteos', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Peso muerto rumano en máquina Belt',m:'5 series · 12-10-8-8-8 reps',note:'Ascendente — subí la carga en cada serie',t:'fuerza'},
-          {n:'Hip thrust con barra',m:'5 × 8-12 reps',note:'Calentamiento previo · ejercicio principal de glúteo',t:'fuerza',key:1},
-          {n:'Femoral parada a una pierna',m:'4 × 8-12 reps por pierna',note:'Control total en la fase negativa',t:'volumen'},
-          {n:'Patada de glúteo en máquina — serie triple',m:'4 × 6-6-6 reps',note:'Drop set: bajá 1 lingote por cada drop',t:'volumen'}
-        ]
-      },
-      {
-        id:'lun_espalda', type:'Bloque 2 · Tirón', name:'Espalda + Postura', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Jalón al pecho toma neutra cerrada',m:'4 × 8-12 reps',note:'Escápulas abajo antes de tirar',t:'fuerza'},
-          {n:'Remo en máquina toma supina',m:'4 × 10 reps',note:'Progresivo — agregá carga en cada serie',t:'fuerza'},
-          {n:'Espinales en banco',m:'4 × 10-15 reps',note:'Control lumbar — espalda recta y firme',t:'postura'}
-        ]
-      },
-      {
-        id:'lun_core', type:'Bloque 3 · Cierre', name:'Core', icon:'core', ic:'ic-core',
-        ex:[
-          {n:'Crunch en máquina dinámica',m:'4 × 8-15 reps',t:'core'},
-          {n:'Crunch banco declinado — serie doble',m:'4 × 12-12 reps',t:'core'},
-          {n:'Escalador cruzado',m:'4 × 30 reps',t:'core'}
-        ]
-      }
-    ]
-  },
+  // LUNES — rutina de fuerza
+  1: rutinaFuerza(),
 
   // MARTES — Running
   2: {
@@ -575,46 +576,8 @@ const GYM = {
     ]
   },
 
-  // MIÉRCOLES — Cuadríceps · Aductores · Hombros · Tríceps
-  3: {
-    label: 'Cuadríceps · Hombros · Tríceps',
-    tipo: 'Hipertrofia · Pierna frontal + Tren superior',
-    sessions: [
-      {
-        id:'mie_pierna', type:'Bloque 1 · Pierna frontal', name:'Cuádriceps + Aductores', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Sentadilla sumo en máquina Hack',m:'4 × 12-10-8-6 reps',note:'Explosivo en la subida — ascendente',t:'fuerza'},
-          {n:'Prensa 45 sumo',m:'4 × 8-12 reps',note:'Carga pesada',t:'fuerza'},
-          {n:'Sillón de cuadríceps — serie doble',m:'4 × 8 reps + fallo',note:'8 pesado — bajá a la mitad y llevá al fallo',t:'volumen'},
-          {n:'Sillón de aductores — serie doble',m:'4 × 10 reps + fallo',note:'Bajá la carga a la mitad para el segundo drop',t:'volumen'},
-          {n:'Estocada fija en multifuerza',m:'4 × 10 reps por pierna',note:'10 a 20 kg en total de carga',t:'volumen'}
-        ]
-      },
-      {
-        id:'mie_hombros', type:'Bloque 2 · Hombros', name:'Hombros + Postura', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Press militar máquina palanca',m:'4 × 8-12 reps',note:'Prioridad hombros — hombros erectos, core firme',t:'postura',key:1},
-          {n:'Vuelos laterales + vuelo frontal con mancuernas',m:'4 × 8-8 reps',note:'No más de 5 kg — fase negativa lenta',t:'postura'},
-          {n:'Face pull de rodillas — serie triple',m:'4 × 6-6-6 reps',note:'Trapecio + postura — bajá 2 lingotes por drop',t:'postura',key:1}
-        ]
-      },
-      {
-        id:'mie_triceps', type:'Bloque 3 · Brazos', name:'Tríceps', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Tríceps tras nuca con mancuerna sentada',m:'4 × 8-12 reps',t:'volumen'},
-          {n:'Tricera con soga polea alta',m:'4 × al fallo',note:'Extensión completa en cada rep',t:'volumen'}
-        ]
-      },
-      {
-        id:'mie_core', type:'Bloque 4 · Cierre', name:'Core', icon:'core', ic:'ic-core',
-        ex:[
-          {n:'Crunch cruzado banco declinado',m:'4 × 15 reps por lado',t:'core'},
-          {n:'Crunch lateral banco espinales con tobilleras',m:'4 × 12 reps por lado',note:'Tobilleras de 2 a 3 kg',t:'core'},
-          {n:'Plancha frontal con peso',m:'4 × 45 seg · 20 seg de pausa',t:'core'}
-        ]
-      }
-    ]
-  },
+  // MIÉRCOLES — rutina de fuerza
+  3: rutinaFuerza(),
 
   // JUEVES — Yoga
   4: {
@@ -630,52 +593,8 @@ const GYM = {
     ]
   },
 
-  // VIERNES — Tren superior · Glúteo · HIIT
-  5: {
-    label: 'Tren superior · Glúteo · HIIT',
-    tipo: 'Fuerza + Potencia · Upper + Glúteo + Cardio',
-    sessions: [
-      {
-        id:'vie_espalda', type:'Bloque 1 · Tirón', name:'Espalda', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Dominadas bíceps',m:'4 × al fallo',note:'Escápulas abajo antes de subir',t:'fuerza'},
-          {n:'Remo con barra toma prono + toma supina',m:'4 × 8-8 reps',note:'Progresivo — codos cerca del cuerpo',t:'fuerza'}
-        ]
-      },
-      {
-        id:'vie_hombros', type:'Bloque 2 · Hombros', name:'Hombros + Postura', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Press militar con barra olímpica parada',m:'4 × 12-15 reps',note:'Core apretado, sin arquear la lumbar',t:'postura',key:1},
-          {n:'Peck deck posteriores',m:'4 × 8-12 reps',note:'Trapecio y postura — retracción escapular al final',t:'postura',key:1},
-          {n:'Vuelos laterales — serie doble',m:'4 × 8-12 reps',note:'2 pares de mancuernas — bajá el peso en el segundo drop',t:'postura'}
-        ]
-      },
-      {
-        id:'vie_biceps', type:'Bloque 3 · Brazos', name:'Bíceps', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Bíceps martillo bilateral con mancuernas',m:'4 × 10 reps',t:'volumen'},
-          {n:'Bíceps con barra recta corta en polea baja',m:'4 × 8-12 reps',t:'volumen'}
-        ]
-      },
-      {
-        id:'vie_gluteo', type:'Bloque 4 · Glúteo', name:'Glúteo de mantenimiento', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Hip thrust con barra o máquina',m:'4 × 8-12 reps',note:'Calentamiento previo · mantenimiento de glúteo',t:'fuerza'},
-          {n:'Patada de glúteo lateral en cable por detrás',m:'4 × 10-15 reps',t:'volumen'}
-        ]
-      },
-      {
-        id:'vie_hiit', type:'Bloque 5 · Circuito final', name:'HIIT', icon:'bolt', ic:'ic-hiit',
-        ex:[
-          {n:'Angelitos',m:'3-4 vueltas × 30 seg · 20 seg de descanso',note:'Circuito explosivo al final — no compromete la fuerza previa',t:'atletico'},
-          {n:'Escalador cruzado',m:'3-4 vueltas × 30 reps',t:'atletico'},
-          {n:'Salto lateral sobre cajón chico',m:'3-4 vueltas × 30 seg',t:'atletico'},
-          {n:'Skiping A (rodillas al pecho)',m:'3-4 vueltas × 30 seg',t:'atletico'},
-          {n:'Bici ventilador',m:'3-4 vueltas × 1 min',note:'2 min de descanso entre vueltas completas',t:'atletico'}
-        ]
-      }
-    ]
-  },
+  // VIERNES — rutina de fuerza
+  5: rutinaFuerza(),
 
   // SÁBADO — Hockey
   6: {
@@ -816,6 +735,7 @@ function totalPct(dt) {
 // ── Init ──
 function init() {
   loadRoutine();
+  seedRutinaFuerza();
   applyEditMode();
   const today = getToday();
   document.getElementById('todayDate').textContent = today.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'});
@@ -1233,6 +1153,19 @@ function loadRoutine(){
     if(saved[dow] === undefined) return;
     GYM[dow] = saved[dow];
   });
+}
+
+// Los días 1, 3 y 5 se re-siembran una única vez con la rutina de fuerza,
+// aunque ya hubiera una rutina guardada. El resto de los días conserva lo
+// que la persona haya editado, y a partir de acá también estos tres.
+const SEED_KEY = 'gr_seed_fuerza_v1';
+function seedRutinaFuerza(){
+  try {
+    if(localStorage.getItem(SEED_KEY)) return;
+    [1,3,5].forEach(d => { GYM[d] = JSON.parse(JSON.stringify(GYM_DEFAULT[d])); });
+    saveRoutine();
+    localStorage.setItem(SEED_KEY, '1');
+  } catch(e){}
 }
 
 function refreshGym(){

@@ -130,6 +130,12 @@ body.edit-on .lbl-edit{display:flex}
 .pbar-fill{height:100%;background:linear-gradient(90deg,var(--rose),var(--rose2));border-radius:2px;transition:width 0.4s ease}
 .pbar-fill.gfill{background:linear-gradient(90deg,var(--green),#79c39a)}
 
+/* lápiz en la cabecera del bloque */
+.sess-edit{width:28px;height:28px;display:none;align-items:center;justify-content:center;border-radius:7px;color:var(--muted2);cursor:pointer;flex-shrink:0;background:var(--card2);border:1px solid var(--border2);transition:all 0.15s}
+.sess-edit .ic{width:14px;height:14px}
+.sess-edit:hover{color:var(--rose);border-color:rgba(212,119,138,0.35)}
+body.edit-on .sess-edit{display:flex}
+
 /* herramientas de bloque (solo en modo edición) */
 .sess-tools{display:none;gap:6px;padding:8px 15px 0;flex-wrap:wrap}
 body.edit-on .sess-tools{display:flex}
@@ -947,7 +953,7 @@ function renderSessions(dt, data) {
     const tools = `<div class="sess-tools">`
       + `<button class="tool-btn" onclick="moveSess(${dow},${si},-1,event)" ${si===0?'disabled':''}>${icon('up')} Subir bloque</button>`
       + `<button class="tool-btn" onclick="moveSess(${dow},${si},1,event)" ${si===data.sessions.length-1?'disabled':''}>${icon('down')} Bajar bloque</button>`
-      + `<button class="tool-btn" onclick="openSessName(${dow},${si},event)">${icon('pencil')} Renombrar</button>`
+      + `<button class="tool-btn" onclick="openSessName(${dow},${si},event)">${icon('pencil')} Nombre e ícono</button>`
       + `<button class="tool-btn danger" onclick="deleteBlock(${dow},${si},event)">${icon('trash')} Eliminar bloque</button>`
       + `</div>`;
     const card = document.createElement('div');
@@ -957,6 +963,7 @@ function renderSessions(dt, data) {
     card.innerHTML = `<div class="sess-hdr" onclick="togSess(${si})">`
       + `<div class="s-ico ${sess.ic||'ic-gym'}">${sessGlyph(sess)}</div>`
       + `<div class="s-inf"><div class="s-type">${esc(sess.type)}</div><div class="s-name">${esc(sess.name)}</div></div>`
+      + `<span class="sess-edit" onclick="openSessName(${dow},${si},event)" title="Renombrar bloque e ícono">${icon('pencil')}</span>`
       + `<span class="s-badge${ok?' ok':''}">${ok?icon('check')+' Listo':din+'/'+sess.ex.length}</span>`
       + `<span class="chevron">${icon('chevron')}</span></div>`
       + `<div class="sess-body"><div class="pbar-wrap"><div class="pbar-lbl"><span>Progreso</span><span>${pct}%</span></div>`

@@ -106,6 +106,8 @@ body.edit-on .lbl-edit{display:flex}
 .session-card.open{border-color:var(--border2)}
 .session-card.all-done{border-color:rgba(79,157,115,0.40)}
 .sess-hdr{padding:13px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.s-emoji{font-size:21px;line-height:1;display:inline-block}
+.res-act-name .s-emoji{font-size:13px}
 .s-ico{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--border)}
 .ic-gym{background:linear-gradient(135deg,rgba(212,119,138,0.16),rgba(212,119,138,0.04));color:var(--rose)}
 .ic-run{background:linear-gradient(135deg,rgba(127,156,123,0.18),rgba(127,156,123,0.04));color:var(--sage)}
@@ -317,6 +319,10 @@ body.edit-on .add-block{display:flex}
 .edit-field{margin-bottom:14px}
 .edit-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .edit-hint{font-size:9px;color:var(--muted2);margin:-6px 0 14px;line-height:1.5}
+.icon-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.icon-opt{width:42px;height:42px;border-radius:11px;border:1px solid var(--border2);background:var(--card2);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;font-size:20px;line-height:1;padding:0}
+.icon-opt .ic{width:20px;height:20px}
+.icon-opt.sel{border-color:rgba(212,119,138,0.5);color:var(--rose);background:var(--rose-dim)}
 .edit-lbl{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px}
 .edit-inp,.edit-sel{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:11px 13px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s}
 .edit-sel{-webkit-appearance:none;appearance:none}
@@ -451,6 +457,12 @@ body.edit-on .add-block{display:flex}
     <div class="edit-field" id="nameSubWrap">
       <label class="edit-lbl" id="nameSubLbl">Subtítulo</label>
       <input class="edit-inp" id="nameSub" type="text" placeholder="ej: Bloque 1 · Fuerza"/>
+    </div>
+    <div class="edit-field" id="nameIconWrap">
+      <label class="edit-lbl">Ícono</label>
+      <div class="icon-grid" id="iconGrid"></div>
+      <input class="edit-inp" id="nameEmoji" type="text" maxlength="8" placeholder="o poné un emoji: 🏑 🌿 🔥" oninput="onEmojiInput()"/>
+      <div class="edit-hint" style="margin:7px 0 0">Elegí uno de los íconos o escribí un emoji con el teclado.</div>
     </div>
     <div class="edit-actions">
       <button class="edit-btn-cancel" onclick="closeName()">Cancelar</button>
@@ -901,6 +913,12 @@ function renderDay(dt) {
 // Bloques desplegados — se conserva al re-renderizar
 let openSess = new Set();
 
+// un bloque muestra su emoji si tiene, si no su ícono SVG
+function sessGlyph(sess){
+  return sess && sess.emoji ? `<span class="s-emoji">${esc(sess.emoji)}</span>`
+                            : icon(sess && sess.icon || 'dumbbell');
+}
+
 function renderSessions(dt, data) {
   const cont = document.getElementById('gymContent');
   cont.innerHTML = '';
@@ -937,7 +955,7 @@ function renderSessions(dt, data) {
     card.id = 'sc'+si;
     card.style.animationDelay = (si*0.06)+'s';
     card.innerHTML = `<div class="sess-hdr" onclick="togSess(${si})">`
-      + `<div class="s-ico ${sess.ic||'ic-gym'}">${icon(sess.icon||'dumbbell')}</div>`
+      + `<div class="s-ico ${sess.ic||'ic-gym'}">${sessGlyph(sess)}</div>`
       + `<div class="s-inf"><div class="s-type">${esc(sess.type)}</div><div class="s-name">${esc(sess.name)}</div></div>`
       + `<span class="s-badge${ok?' ok':''}">${ok?icon('check')+' Listo':din+'/'+sess.ex.length}</span>`
       + `<span class="chevron">${icon('chevron')}</span></div>`
@@ -1118,7 +1136,7 @@ function renderResumen() {
     if(data) {
       data.sessions.forEach(sess => {
         const dn = isFuture ? 0 : sess.ex.filter(e=>store[gymKey(dt,e.n)]).length;
-        acts.push({type:sess.ic==='ic-gym'?'gym':'run',name:`${icon(sess.icon||'dumbbell')} ${esc(sess.name)}${isFuture?'':' ('+dn+'/'+sess.ex.length+')'}`,done:!isFuture&&sess.ex.length>0&&dn===sess.ex.length});
+        acts.push({type:sess.ic==='ic-gym'?'gym':'run',name:`${sessGlyph(sess)} ${esc(sess.name)}${isFuture?'':' ('+dn+'/'+sess.ex.length+')'}`,done:!isFuture&&sess.ex.length>0&&dn===sess.ex.length});
       });
     } else {
       acts.push({type:'rest',name:icon('moon')+' Descanso total',done:true});
@@ -1363,13 +1381,45 @@ function deleteBlock(dow, si, e){
 // ── MODAL: renombrar día o bloque ──
 let nameCtx = null;   // {kind:'day'|'sess', dow, si}
 
-function openNameModal(title, label, value, subLabel, subValue, showReset){
+// íconos disponibles para un bloque, además de cualquier emoji
+const ICON_CHOICES = ['dumbbell','core','bolt','run','leaf','hockey','posture','timer','moon'];
+let iconSel = null;   // nombre del ícono elegido, o null si se usa un emoji
+
+function buildIconGrid(){
+  const g = document.getElementById('iconGrid');
+  g.innerHTML = ICON_CHOICES.map(n =>
+    `<button type="button" class="icon-opt${n===iconSel?' sel':''}" data-ic="${n}" onclick="pickIcon('${n}')">${icon(n)}</button>`
+  ).join('');
+}
+
+function pickIcon(n){
+  iconSel = n;
+  document.getElementById('nameEmoji').value = '';   // el ícono manda sobre el emoji
+  buildIconGrid();
+}
+
+function onEmojiInput(){
+  // si escribe un emoji, se deselecciona el ícono
+  if(document.getElementById('nameEmoji').value.trim()){
+    iconSel = null;
+    buildIconGrid();
+  }
+}
+
+function openNameModal(title, label, value, subLabel, subValue, showReset, sess){
   document.getElementById('nameTitle').textContent = title;
   document.getElementById('nameLbl').textContent = label;
   document.getElementById('nameInp').value = value || '';
   document.getElementById('nameSubLbl').textContent = subLabel;
   document.getElementById('nameSub').value = subValue || '';
   document.getElementById('nameReset').style.display = showReset ? 'block' : 'none';
+  // el ícono solo aplica a bloques
+  document.getElementById('nameIconWrap').style.display = sess ? '' : 'none';
+  if(sess){
+    document.getElementById('nameEmoji').value = sess.emoji || '';
+    iconSel = sess.emoji ? null : (sess.icon || 'dumbbell');
+    buildIconGrid();
+  }
   document.getElementById('nameOv').classList.add('show');
   setTimeout(()=>document.getElementById('nameInp').focus(), 80);
 }
@@ -1379,14 +1429,14 @@ function openDayName(){
   if(!GYM[dow]) return;
   nameCtx = {kind:'day', dow};
   openNameModal('Actividad del día', 'Nombre de la actividad', GYM[dow].label,
-                'Descripción corta', GYM[dow].tipo, true);
+                'Descripción corta', GYM[dow].tipo, true, null);
 }
 
 function openSessName(dow, si, e){
   if(e) e.stopPropagation();
+  const sess = GYM[dow].sessions[si];
   nameCtx = {kind:'sess', dow, si};
-  openNameModal('Nombre del bloque', 'Nombre', GYM[dow].sessions[si].name,
-                'Subtítulo', GYM[dow].sessions[si].type, false);
+  openNameModal('Nombre del bloque', 'Nombre', sess.name, 'Subtítulo', sess.type, false, sess);
 }
 
 function closeName(){
@@ -1406,8 +1456,12 @@ function saveName(){
     GYM[nameCtx.dow].label = v;
     GYM[nameCtx.dow].tipo = sub;
   } else {
-    GYM[nameCtx.dow].sessions[nameCtx.si].name = v;
-    GYM[nameCtx.dow].sessions[nameCtx.si].type = sub;
+    const sess = GYM[nameCtx.dow].sessions[nameCtx.si];
+    sess.name = v;
+    sess.type = sub;
+    const emoji = document.getElementById('nameEmoji').value.trim();
+    sess.emoji = emoji;                       // vacío = se usa el ícono
+    if(!emoji) sess.icon = iconSel || sess.icon || 'dumbbell';
   }
   saveRoutine();
   closeName();

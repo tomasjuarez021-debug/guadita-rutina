@@ -86,6 +86,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
 /* DIA */
 .day-hero{margin-bottom:16px}
+.plan-pill{display:inline-flex;align-items:center;gap:7px;font-size:9px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:10px;border:1px solid var(--border2);background:var(--card2);color:var(--muted)}
+.plan-pill .plan-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.plan-pill.f1{background:var(--sage-dim);color:var(--sage);border-color:rgba(127,156,123,0.35)}
+.plan-pill.f2{background:var(--green-dim);color:var(--green);border-color:rgba(79,157,115,0.35)}
+.plan-pill.f3{background:var(--rose-dim);color:var(--rose);border-color:rgba(212,119,138,0.35)}
 .lbl-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .day-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;color:var(--rose)}
 .day-big{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:900;letter-spacing:1px;line-height:1;color:var(--text);margin-top:3px}
@@ -156,6 +161,9 @@ body.edit-on .sess-tools{display:flex}
 .ex-mt{font-size:10px;color:var(--muted)}
 .ex-nt{font-size:10px;color:var(--muted);margin-top:2px;font-style:italic;line-height:1.45}
 .ex-key{display:inline-block;font-size:8px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;color:var(--rose);background:var(--rose-dim);border:1px solid rgba(212,119,138,0.22);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:1px}
+.pri-badge{display:inline-block;font-size:8px;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:1px;border:1px solid;white-space:nowrap}
+.pri-lumbar{color:var(--green);background:var(--green-dim);border-color:rgba(79,157,115,0.30)}
+.pri-escapula{color:var(--rose);background:var(--rose-dim);border-color:rgba(212,119,138,0.30)}
 .ex-tag{font-size:8px;font-weight:700;padding:3px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.6px;flex-shrink:0;cursor:pointer}
 .tag-fuerza{background:rgba(212,119,138,0.12);color:#c26a7d}
 .tag-volumen{background:rgba(214,165,82,0.16);color:#b08430}
@@ -381,6 +389,7 @@ body.edit-on .add-block{display:flex}
 <div class="content">
   <div class="view active" id="view-gym">
     <div class="day-hero">
+      <div class="plan-pill" id="planPill"></div>
       <div class="lbl-row">
         <div class="day-lbl" id="dayLbl">—</div>
         <button class="lbl-edit" id="dayLblEdit" onclick="openDayName()" title="Renombrar actividad del día"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.3 19.7h4L19.2 8.8a2.5 2.5 0 0 0-3.5-3.5L4.3 15.7v4z"/><path d="M14.6 6.5l3.4 3.4"/></svg></button>
@@ -519,100 +528,213 @@ const DS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const DN=['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
 const TL={fuerza:'fuerza',volumen:'volumen',core:'core',postura:'postura',correctivo:'correctivo',atletico:'atlético',cardio:'cardio'};
 
-// ── RUTINA DE GIMNASIO ──
-// Cada día se organiza en bloques (sesiones) temáticos: el orden del bloque
-// es el orden real de entrenamiento.
-// ── RUTINA DE FUERZA ──
-// Se repite lunes, miércoles y viernes. Cada día recibe su propia copia,
-// así se puede editar un día sin tocar los otros.
-function rutinaFuerza(){
-  return {
-    label: 'Gambas · Fuerza de piernas',
-    tipo: 'Entrada en calor + Fuerza',
-    sessions: [
-      {
-        id:'ef_calor', type:'Pre-activación · 10 min', name:'Entrada en calor', icon:'leaf', ic:'ic-yoga',
-        ex:[
-          {n:'Soga', sets:'', reps:'5 minutos', weight:'', note:'', t:'cardio'},
-          {n:'Mobility drills', sets:'', reps:'5 min', weight:'', note:'Caderas - rodillas - tobillos', t:'correctivo'}
-        ]
-      },
-      {
-        id:'ef_gambas', type:'Gym - 19:00 hs', name:'Gambas - fuerza', icon:'dumbbell', ic:'ic-gym',
-        ex:[
-          {n:'Sentadillas con ketbell', sets:'4', reps:'20 reps', weight:'30 kg', note:'', t:'fuerza'},
-          {n:'Wall sits', sets:'4', reps:'60s', weight:'10kg', note:'', t:'fuerza'},
-          {n:'Subidas al cajon', sets:'4', reps:'20 reps', weight:'10 kg x lado', note:'', t:'fuerza'},
-          {n:'Peso muerto ketbell', sets:'4', reps:'20 reps', weight:'15 kg', note:'', t:'fuerza'},
-          {n:'Estocadas a dos piernas', sets:'', reps:'20 reps', weight:'10 kg', note:'', t:'fuerza'},
-          {n:'Sentadillas aductores', sets:'4', reps:'20 reps', weight:'15 kg', note:'', t:'fuerza'},
-          {n:'Gemelos', sets:'4', reps:'20 reps', weight:'30 kg', note:'', t:'fuerza'}
-        ]
-      }
-    ]
-  };
+// ── PLAN DE 19 SEMANAS ──
+// El plan arranca el lunes de la semana 1 y avanza solo con la fecha.
+// Para correrlo de lugar, cambiá únicamente esta constante.
+const PLAN_START = new Date('2026-08-17T00:00:00');   // lunes de la semana 1
+const PLAN_SEMANAS = 19;
+
+const FASES = {
+  1:{nombre:'Reactivación',      desde:1, hasta:2},
+  2:{nombre:'Base atlética',     desde:3, hasta:6},
+  3:{nombre:'Desarrollo híbrido',desde:7, hasta:19}
+};
+
+// día absoluto (sin horas) — evita corrimientos por husos o cambios de hora
+function diaAbs(dt){ return Math.floor(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate())/86400000); }
+
+function planInfo(dt){
+  const dias = diaAbs(dt) - diaAbs(PLAN_START);
+  if(dias < 0) return {estado:'antes', semana:0, fase:1};
+  const semana = Math.floor(dias/7) + 1;
+  if(semana > PLAN_SEMANAS) return {estado:'fin', semana, fase:3};
+  return {estado:'activo', semana, fase: semana<=2 ? 1 : semana<=6 ? 2 : 3};
 }
 
-const GYM = {
-  // DOMINGO — descanso
-  0: null,
+// ── RUTINA DE GIMNASIO, POR FASE ──
+// Cada fase tiene su propia semana (0=Dom … 6=Sáb). Las tres comparten el
+// mismo formato de bloque y de ejercicio que usa el resto de la app.
+// pri:'lumbar' y pri:'escapula' marcan el trabajo que atraviesa las 3 fases.
+const PLAN_DEFAULT = {
 
-  // LUNES — rutina de fuerza
-  1: rutinaFuerza(),
+  // ══ FASE 1 — Reactivación (semanas 1-2) ══
+  // Recuperar hábito, activar estabilizadores, cero carga axial e impacto.
+  1: {
+    0: null,
+    1: {
+      label:'Full body A', tipo:'Reactivación · Fuerza general',
+      sessions:[{ id:'f1_lun', type:'Fuerza · Full body', name:'Full body A', icon:'dumbbell', ic:'ic-gym', ex:[
+        {n:'Sentadilla goblet',m:'3 × 10-12',t:'fuerza'},
+        {n:'Press banca con mancuernas',m:'3 × 10-12',t:'fuerza'},
+        {n:'Remo en máquina con apoyo de pecho',m:'3 × 12',t:'volumen',pri:'escapula'},
+        {n:'Hip thrust',m:'3 × 12',t:'fuerza'},
+        {n:'Dead bug',m:'3 × 8 por lado',t:'core',pri:'lumbar'},
+        {n:'Band pull-apart',m:'3 × 15',t:'postura',pri:'escapula'}
+      ]}]
+    },
+    2: {
+      label:'Cardio Z2 + movilidad', tipo:'Zona 2 · Bajo impacto',
+      sessions:[{ id:'f1_mar', type:'Cardio · Zona 2', name:'Cardio + movilidad', icon:'run', ic:'ic-run', ex:[
+        {n:'Cardio zona 2',m:'20-30 minutos',note:'Cinta, bici o elíptica',t:'cardio'},
+        {n:'Movilidad',m:'10 minutos',note:'Tobillo · cadera 90/90 · columna torácica · hombro con banda',t:'postura'}
+      ]}]
+    },
+    3: {
+      label:'Full body B', tipo:'Reactivación · Fuerza general',
+      sessions:[{ id:'f1_mie', type:'Fuerza · Full body', name:'Full body B', icon:'dumbbell', ic:'ic-gym', ex:[
+        {n:'Peso muerto rumano con mancuernas',m:'3 × 10-12',note:'Liviano',t:'fuerza'},
+        {n:'Jalón al pecho',m:'3 × 10-12',t:'volumen'},
+        {n:'Press militar mancuernas sentada con respaldo',m:'3 × 10-12',t:'fuerza'},
+        {n:'Bird dog',m:'3 × 8 por lado',t:'core',pri:'lumbar'},
+        {n:'Wall slides',m:'3 × 12',t:'postura',pri:'escapula'}
+      ]}]
+    },
+    4: {
+      label:'Cardio Z2 + yoga', tipo:'Zona 2 · Flexibilidad',
+      sessions:[{ id:'f1_jue', type:'Cardio · Zona 2', name:'Cardio + yoga', icon:'leaf', ic:'ic-yoga', ex:[
+        {n:'Cardio zona 2',m:'20-30 minutos',t:'cardio'},
+        {n:'Yoga / flexibilidad completa',m:'Sesión completa',t:'postura'}
+      ]}]
+    },
+    5: {
+      label:'Full body C', tipo:'Reactivación · Unilateral',
+      sessions:[{ id:'f1_vie', type:'Fuerza · Full body', name:'Full body C', icon:'dumbbell', ic:'ic-gym', ex:[
+        {n:'Sentadilla búlgara',m:'3 × 8-10 por lado',note:'Con apoyo',t:'fuerza'},
+        {n:'Empuje de cadera a una pierna',m:'3 × 10 por lado',t:'volumen'},
+        {n:'Remo a un brazo con mancuerna',m:'3 × 10 por lado',note:'Nivelar lados',t:'volumen',pri:'escapula'},
+        {n:'Farmer carry',m:'3 × 30 m',t:'atletico'},
+        {n:'Plancha lateral',m:'3 × 20-30 seg por lado',t:'core',pri:'lumbar'},
+        {n:'Retracción escapular en polea',m:'3 × 15',t:'postura',pri:'escapula'}
+      ]}]
+    },
+    6: null
+  },
 
-  // MARTES — Running
+  // ══ FASE 2 — Base atlética (semanas 3-6) ══
+  // Reforzar erectores y escápula, impacto bajo, todavía sin barra pesada.
   2: {
-    label: 'Running',
-    tipo: 'Cardio · Resistencia atlética',
-    sessions: [
-      {
-        id:'mar_run', type:'Cardio · Aire libre', name:'Carrera continua o intervalos', icon:'run', ic:'ic-run',
-        ex:[
-          {n:'Calentamiento trote suave',m:'8-10 minutos',t:'cardio'},
-          {n:'Carrera continua o intervalos',m:'20-30 minutos al ritmo elegido',note:'Podés alternar entre ritmo constante e intervalos',t:'cardio'},
-          {n:'Vuelta a la calma caminando',m:'5 minutos',t:'cardio'}
-        ]
-      }
-    ]
+    0: null,
+    1: {
+      label:'Tren inferior sin carga axial', tipo:'Base atlética · Piernas',
+      sessions:[{ id:'f2_lun', type:'Fuerza · Sin carga axial', name:'Tren inferior', icon:'dumbbell', ic:'ic-gym', ex:[
+        {n:'Prensa 45°',m:'4 × 10-12',t:'fuerza'},
+        {n:'Hip thrust con barra',m:'4 × 10-12',t:'fuerza'},
+        {n:'Sentadilla goblet',m:'3 × 10',note:'Torso erguido',t:'fuerza'},
+        {n:'Pull-through en polea',m:'3 × 12',note:'Bisagra sin compresión',t:'volumen',pri:'lumbar'},
+        {n:'Camilla de femorales',m:'3 × 12',t:'volumen'},
+        {n:'Elevación de gemelos',m:'4 × 15',t:'volumen'}
+      ]}]
+    },
+    2: {
+      label:'Running Z2 + core lumbar', tipo:'Base aeróbica · Core',
+      sessions:[{ id:'f2_mar', type:'Cardio + core', name:'Running + core', icon:'run', ic:'ic-run', ex:[
+        {n:'Running zona 2 + drills de técnica',m:'25-35 minutos',t:'cardio'},
+        {n:'Bird dog',m:'3 × 8 por lado',t:'core',pri:'lumbar'},
+        {n:'Dead bug',m:'3 × 8 por lado',t:'core',pri:'lumbar'},
+        {n:'Plancha lateral',m:'3 × 30 seg por lado',t:'core',pri:'lumbar'}
+      ]}]
+    },
+    3: {
+      label:'Tren superior · foco escápula', tipo:'Base atlética · Espalda y hombro',
+      sessions:[{ id:'f2_mie', type:'Fuerza · Foco escápula', name:'Tren superior', icon:'dumbbell', ic:'ic-gym', ex:[
+        {n:'Remo en máquina con apoyo de pecho',m:'4 × 10-12',t:'volumen',pri:'escapula'},
+        {n:'Jalón al pecho',m:'4 × 10',t:'volumen'},
+        {n:'Remo a un brazo',m:'3 × 10 por lado',note:'Una serie extra del lado derecho',t:'volumen',pri:'escapula'},
+        {n:'Press militar sentada con respaldo',m:'3 × 10',t:'fuerza'},
+        {n:'Face pull',m:'4 × 15',note:'Romboides y trapecio bajo',t:'postura',pri:'escapula'},
+        {n:'Y-T-W en banco inclinado',m:'3 × 10',note:'Estabilizadores',t:'postura',pri:'escapula'}
+      ]}]
+    },
+    4: {
+      label:'Cardio de calidad', tipo:'Intervalos · Bajo impacto',
+      sessions:[{ id:'f2_jue', type:'Cardio · Intervalos', name:'Calidad bajo impacto', icon:'bolt', ic:'ic-hiit', ex:[
+        {n:'Intervalos en bici o elíptica',m:'6 × 2 min fuerte / 90 seg suave',t:'cardio'},
+        {n:'Aceleraciones suaves en pasto',m:'6 × 20 m',note:'Solo si la lumbar responde bien',t:'atletico'}
+      ]}]
+    },
+    5: {
+      label:'Posterior + refuerzo lumbar', tipo:'Base atlética · Cadena posterior',
+      sessions:[{ id:'f2_vie', type:'Fuerza · Cadena posterior', name:'Posterior + lumbar', icon:'dumbbell', ic:'ic-gym', ex:[
+        {n:'Hiperextensiones 45° controladas',m:'3 × 12-15',note:'Erectores',t:'volumen',pri:'lumbar'},
+        {n:'Peso muerto rumano con mancuernas',m:'3 × 10',t:'fuerza'},
+        {n:'Sentadilla búlgara',m:'3 × 8 por lado',t:'fuerza'},
+        {n:'Farmer carry pesado',m:'4 × 40 m',note:'Core global',t:'atletico',pri:'lumbar'},
+        {n:'Serratus punch / wall slides',m:'3 × 12',note:'Serrato',t:'postura',pri:'escapula'},
+        {n:'Movilidad',m:'10-15 minutos',note:'Torácica · pectoral · cadera · isquios',t:'postura'}
+      ]}]
+    },
+    6: null
   },
 
-  // MIÉRCOLES — rutina de fuerza
-  3: rutinaFuerza(),
-
-  // JUEVES — Yoga
-  4: {
-    label: 'Yoga',
-    tipo: 'Flexibilidad · Mente y cuerpo',
-    sessions: [
-      {
-        id:'jue_yoga', type:'Movilidad · Clase', name:'Sesión de Yoga', icon:'leaf', ic:'ic-yoga',
-        ex:[
-          {n:'Sesión de Yoga',m:'Duración según la clase',note:'Complementa la recuperación muscular y la movilidad',t:'correctivo'}
-        ]
-      }
-    ]
-  },
-
-  // VIERNES — rutina de fuerza
-  5: rutinaFuerza(),
-
-  // SÁBADO — Hockey
-  6: {
-    label: 'Hockey',
-    tipo: 'Deporte · Equipo',
-    sessions: [
-      {
-        id:'sab_hockey', type:'Partido o práctica', name:'Hockey', icon:'hockey', ic:'ic-hockey',
-        ex:[
-          {n:'Hockey — partido o práctica',m:'Duración del partido o entrenamiento',note:'Actividad de alta intensidad — cuenta como día activo',t:'atletico'}
-        ]
-      }
-    ]
+  // ══ FASE 3 — Desarrollo híbrido (semanas 7-19) ══
+  // Cargar sobre base sólida. Carga axial e impacto solo si la lumbar
+  // quedó sin síntomas.
+  3: {
+    0: null,
+    1: {
+      label:'Fuerza inferior + potencia', tipo:'Desarrollo híbrido · Piernas',
+      sessions:[{ id:'f3_lun', type:'Fuerza · Potencia', name:'Inferior + potencia', icon:'dumbbell', ic:'ic-gym', ex:[
+        {n:'Sentadilla con barra',m:'5 × 4-5',note:'Reintroducción axial controlada',t:'fuerza',pri:'lumbar'},
+        {n:'Salto al cajón',m:'5 × 3',t:'atletico'},
+        {n:'Peso muerto rumano con barra',m:'4 × 6',note:'Moderado · hinge cargado',t:'fuerza',pri:'lumbar'},
+        {n:'Estocada búlgara con mancuernas',m:'3 × 8 por lado',t:'volumen'},
+        {n:'Hip thrust',m:'4 × 8',t:'fuerza'},
+        {n:'Plancha con peso',m:'3 × 45 seg',t:'core',pri:'lumbar'}
+      ]}]
+    },
+    2: {
+      label:'Running Z2 + yoga', tipo:'Base aeróbica · Movilidad',
+      sessions:[{ id:'f3_mar', type:'Cardio + movilidad', name:'Running + yoga', icon:'run', ic:'ic-run', ex:[
+        {n:'Running zona 2',m:'35-50 minutos',note:'Base aeróbica',t:'cardio'},
+        {n:'Yoga / movilidad',m:'Sesión completa',t:'postura'},
+        {n:'Pallof press',m:'3 × 10 por lado',note:'Antirrotación',t:'core',pri:'lumbar'}
+      ]}]
+    },
+    3: {
+      label:'Fuerza superior + core', tipo:'Desarrollo híbrido · Tren superior',
+      sessions:[{ id:'f3_mie', type:'Fuerza · Tren superior', name:'Superior + core', icon:'dumbbell', ic:'ic-gym', ex:[
+        {n:'Press banca',m:'5 × 4-6',t:'fuerza'},
+        {n:'Dominadas',m:'4 × 5-8',note:'Lastradas si podés',t:'volumen',pri:'escapula'},
+        {n:'Press militar de pie',m:'4 × 6',t:'fuerza'},
+        {n:'Remo pendlay o con barra',m:'4 × 8',note:'Espalda alta pesada',t:'volumen',pri:'escapula'},
+        {n:'Face pull + Y-T-W',m:'3 × 15',note:'Mantenimiento fijo',t:'postura',pri:'escapula'},
+        {n:'Colgado: elevación de piernas',m:'3 × 10-12',t:'core'}
+      ]}]
+    },
+    4: {
+      label:'Running de calidad', tipo:'Umbral o VO₂',
+      sessions:[{ id:'f3_jue', type:'Cardio · Calidad', name:'Running de calidad', icon:'bolt', ic:'ic-hiit', ex:[
+        {n:'Umbral',m:'4 × 5 min fuerte / 90 seg suave',note:'Elegí esta opción o la de VO₂',t:'cardio'},
+        {n:'VO₂ máx',m:'6-8 × 400 m con 200 m de trote',note:'Alternativa al umbral',t:'cardio'}
+      ]}]
+    },
+    5: {
+      label:'Full body atlético / HYROX', tipo:'Desarrollo híbrido · Atlético',
+      sessions:[{ id:'f3_vie', type:'Atlético · HYROX', name:'Full body atlético', icon:'bolt', ic:'ic-hiit', ex:[
+        {n:'Clean con mancuernas o kettlebell',m:'4 × 5',t:'atletico'},
+        {n:'Thruster',m:'4 × 8',t:'atletico'},
+        {n:'Circuito HYROX',m:'3-4 vueltas',note:'400 m + 20 lunges + 15 burpees + remo 250 m',t:'atletico'},
+        {n:'Sled push/pull o farmer carry',m:'4 × 30 m',note:'Core',t:'atletico',pri:'lumbar'}
+      ]}]
+    },
+    6: {
+      label:'Deporte / long run', tipo:'Opcional · Carga atlética',
+      sessions:[{ id:'f3_sab', type:'Opcional · Deporte', name:'Deporte o long run', icon:'hockey', ic:'ic-hockey', ex:[
+        {n:'Hockey, surf o wakeboard',m:'Sesión completa',note:'Cuenta como carga',t:'atletico'},
+        {n:'Long run Z2 + agilidad',m:'Sprints 6 × 30 m + cambios de dirección en T',note:'Alternativa al deporte',t:'atletico'}
+      ]}]
+    }
   }
 };
 
-// copia intacta de la rutina original — permite restaurar un día editado
-const GYM_DEFAULT = JSON.parse(JSON.stringify(GYM));
+// copia editable del plan — lo que se guarda y se puede modificar
+let PLAN = JSON.parse(JSON.stringify(PLAN_DEFAULT));
+
+// la semana de gimnasio que corresponde a una fecha
+function gymDe(dt){ return PLAN[planInfo(dt).fase]; }
+function getGym(dt){ const w = gymDe(dt); return w ? w[dt.getDay()] : null; }
+// la fase que se está viendo (todas las ediciones son sobre el día visible)
+function planActual(){ return PLAN[planInfo(curDayDate).fase]; }
 
 // ── MOVILIDAD / POSTURA ──
 const POST={
@@ -712,7 +834,7 @@ let resWeekOffset = 0;
 
 // ── Porcentajes ──
 function gymPct(dt) {
-  const data = GYM[dt.getDay()];
+  const data = getGym(dt);
   if(!data) return 0;
   const all = data.sessions.flatMap(s=>s.ex);
   return all.length ? Math.round(all.filter(e=>store[gymKey(dt,e.n)]).length/all.length*100) : 0;
@@ -727,7 +849,7 @@ function mobDone(dt){ return !!store[mobKey(dt)]; }
 function totalPct(dt) {
   const gp = gymPct(dt);
   const pp = postPct(dt);
-  if(!GYM[dt.getDay()]) return pp;
+  if(!getGym(dt)) return pp;
   if(!postSessKey(dt.getDay())) return gp;
   return Math.round((gp+pp)/2);
 }
@@ -735,7 +857,6 @@ function totalPct(dt) {
 // ── Init ──
 function init() {
   loadRoutine();
-  seedRutinaFuerza();
   applyEditMode();
   const today = getToday();
   document.getElementById('todayDate').textContent = today.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'});
@@ -819,7 +940,8 @@ function exMeta(ex){
 
 function renderDay(dt) {
   const d = dt.getDay();
-  const data = GYM[d];
+  const data = getGym(dt);
+  renderPlanPill(dt);
   document.getElementById('dayBig').textContent = DN[d];
   document.getElementById('dayLblEdit').style.display = data ? '' : 'none';
   const cont = document.getElementById('gymContent');
@@ -836,8 +958,35 @@ function renderDay(dt) {
   renderSessions(dt, data);
 }
 
+function fmtDia(dt){
+  return dt.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+}
+
+function renderPlanPill(dt){
+  const el = document.getElementById('planPill');
+  if(!el) return;
+  const p = planInfo(dt);
+  if(p.estado === 'antes'){
+    el.className = 'plan-pill';
+    el.innerHTML = `<span class="plan-dot"></span>El plan arranca el ${esc(fmtDia(PLAN_START))}`;
+  } else if(p.estado === 'fin'){
+    el.className = 'plan-pill';
+    el.innerHTML = `<span class="plan-dot"></span>Plan finalizado · seguís en Fase 3`;
+  } else {
+    el.className = 'plan-pill f' + p.fase;
+    el.innerHTML = `<span class="plan-dot"></span>Semana ${p.semana} / ${PLAN_SEMANAS} · Fase ${p.fase} — ${FASES[p.fase].nombre}`;
+  }
+}
+
 // Bloques desplegados — se conserva al re-renderizar
 let openSess = new Set();
+
+// refuerzo que atraviesa las 3 fases: lumbar (verde) y escápula (rosa)
+function priBadge(ex){
+  if(ex.pri === 'lumbar')   return '<span class="pri-badge pri-lumbar">lumbar</span>';
+  if(ex.pri === 'escapula') return '<span class="pri-badge pri-escapula">escápula (der.)</span>';
+  return '';
+}
 
 // un bloque muestra su emoji si tiene, si no su ícono SVG
 function sessGlyph(sess){
@@ -860,7 +1009,7 @@ function renderSessions(dt, data) {
       const tap = `onclick="toggleGymAt(${si},${ei},'${dtStr}')"`;
       return `<div class="ex-item${done?' done':''}">`
         + `<div class="ex-chk" ${tap}>${done?icon('check'):''}</div>`
-        + `<div class="ex-det" ${tap}><div class="ex-nm">${esc(ex.n)}${ex.key?'<span class="ex-key">clave</span>':''}</div>`
+        + `<div class="ex-det" ${tap}><div class="ex-nm">${esc(ex.n)}${ex.key?'<span class="ex-key">clave</span>':''}${priBadge(ex)}</div>`
         + `${meta?`<div class="ex-mt">${esc(meta)}</div>`:''}`
         + `${ex.note?`<div class="ex-nt">${esc(ex.note)}</div>`:''}</div>`
         + `${ex.t?`<span class="ex-tag tag-${esc(ex.t)}" ${tap}>${esc(TL[ex.t]||ex.t)}</span>`:''}`
@@ -907,7 +1056,7 @@ function togSess(i){
 function toggleGymAt(si, ei, dtStr) {
   const [y,m,d2] = dtStr.split('-').map(Number);
   const dt = new Date(y,m-1,d2);
-  const data = GYM[dt.getDay()];
+  const data = getGym(dt);
   const ex = data && data.sessions[si] && data.sessions[si].ex[ei];
   if(!ex) return;
   const k = gymKey(dt, ex.n);
@@ -996,14 +1145,14 @@ function renderResumen() {
   const weekRange = `${fmt(weekMon)} – ${fmt(weekSun)}`;
   const isCurrentWeek = resWeekOffset === 0;
 
-  cont.innerHTML = `<div class="res-header"><div class="res-title">RESUMEN SEMANAL</div><div class="res-sub">Vista general · progreso y actividades</div></div>`;
+  cont.innerHTML = `<div class="res-header"><div class="res-title">RESUMEN SEMANAL</div><div class="res-sub">${planResumenTxt()}</div></div>`;
 
   const sd = curDayDate;
   const sdStr = dateStr(sd);
   const gp = gymPct(sd), pp = postPct(sd), tp = totalPct(sd);
   const tb = document.createElement('div');
   tb.className = 'today-box';
-  const isRestDay = !GYM[sd.getDay()] && !postSessKey(sd.getDay());
+  const isRestDay = !getGym(sd) && !postSessKey(sd.getDay());
   const dayLabel = sdStr === todayStr ? 'HOY · ' : '';
   const hdr = `<div class="today-box-lbl">${icon('calendar')} ${dayLabel}${DN[sd.getDay()]}</div>`;
 
@@ -1012,7 +1161,7 @@ function renderResumen() {
   } else {
     const C = 2 * Math.PI * 34;
     const off = C * (1 - Math.min(tp,100)/100);
-    const hasGym = !!GYM[sd.getDay()];
+    const hasGym = !!getGym(sd);
     const hasMob = !!postSessKey(sd.getDay());
     const bar = (nm, ico, val, cls, show) => show
       ? `<div><div class="stat-top"><span class="stat-nm">${icon(ico)} ${nm}</span><span class="stat-val">${val}%</span></div><div class="stat-bar"><div class="stat-fill ${val>=100?'full':cls}" style="width:${val}%"></div></div></div>`
@@ -1053,7 +1202,7 @@ function renderResumen() {
     const isFuture = dt > today;
     const isToday2 = dtStr2 === todayStr;
     const isCurDay = dtStr2 === sdStr;
-    const data = GYM[d];
+    const data = getGym(dt);
     const tp2 = isFuture ? 0 : totalPct(dt);
     const sk = postSessKey(d);
     const pctColor = tp2>=100?'var(--green)':tp2>0?'var(--rose)':'var(--muted)';
@@ -1091,6 +1240,13 @@ function renderResumen() {
     <div class="res-day-body"><div class="res-act-list">${actsHTML}</div></div>`;
     cont.appendChild(card);
   });
+}
+
+function planResumenTxt(){
+  const p = planInfo(curDayDate);
+  if(p.estado === 'antes') return 'El plan arranca el ' + fmtDia(PLAN_START);
+  if(p.estado === 'fin')   return 'Plan finalizado · seguís en Fase 3';
+  return `Semana ${p.semana} / ${PLAN_SEMANAS} · Fase ${p.fase} — ${FASES[p.fase].nombre}`;
 }
 
 function changeWeek(delta) {
@@ -1138,34 +1294,22 @@ function sw(v){
 // ── RUTINA EDITABLE ──
 // Se guarda la rutina completa por día de semana: al editar cualquier cosa de
 // un día, ese día queda "propio" y ya no toma el default.
-const ROUTINE_KEY = 'gr_routine_v1';
+const ROUTINE_KEY = 'gr_plan_v1';
 
 function saveRoutine(){
-  const out = {};
-  for(let d=0; d<7; d++) out[d] = GYM[d] || null;
-  try { localStorage.setItem(ROUTINE_KEY, JSON.stringify(out)); } catch(e){}
+  try { localStorage.setItem(ROUTINE_KEY, JSON.stringify(PLAN)); } catch(e){}
 }
 
 function loadRoutine(){
-  let saved = {};
-  try { saved = JSON.parse(localStorage.getItem(ROUTINE_KEY) || '{}'); } catch(e){ saved = {}; }
-  Object.keys(saved).forEach(dow => {
-    if(saved[dow] === undefined) return;
-    GYM[dow] = saved[dow];
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(ROUTINE_KEY) || 'null'); } catch(e){ saved = null; }
+  if(!saved) return;
+  [1,2,3].forEach(f => {
+    if(!saved[f]) return;
+    for(let d=0; d<7; d++){
+      if(saved[f][d] !== undefined) PLAN[f][d] = saved[f][d];
+    }
   });
-}
-
-// Los días 1, 3 y 5 se re-siembran una única vez con la rutina de fuerza,
-// aunque ya hubiera una rutina guardada. El resto de los días conserva lo
-// que la persona haya editado, y a partir de acá también estos tres.
-const SEED_KEY = 'gr_seed_fuerza_v1';
-function seedRutinaFuerza(){
-  try {
-    if(localStorage.getItem(SEED_KEY)) return;
-    [1,3,5].forEach(d => { GYM[d] = JSON.parse(JSON.stringify(GYM_DEFAULT[d])); });
-    saveRoutine();
-    localStorage.setItem(SEED_KEY, '1');
-  } catch(e){}
 }
 
 function refreshGym(){
@@ -1206,7 +1350,8 @@ function fillEdit(ex){
 
 function openEdit(dow, si, ei, e){
   if(e) e.stopPropagation();
-  const ex = GYM[dow] && GYM[dow].sessions[si] && GYM[dow].sessions[si].ex[ei];
+  const G = planActual();
+  const ex = G[dow] && G[dow].sessions[si] && G[dow].sessions[si].ex[ei];
   if(!ex) return;
   editCtx = {dow, si, ei};
   // si el ejercicio viene del formato original ("4 × 10 reps"), se muestra en Reps
@@ -1249,7 +1394,7 @@ function saveEdit(){
     t:      document.getElementById('editTag').value,
     m: ''   // se descarta el formato libre original al guardar
   };
-  const list = GYM[dow].sessions[si].ex;
+  const list = planActual()[dow].sessions[si].ex;
   if(ei === null) list.push(data);
   else Object.assign(list[ei], data);
   saveRoutine();
@@ -1260,9 +1405,10 @@ function saveEdit(){
 function deleteEx(){
   if(!editCtx || editCtx.ei === null) return;
   const {dow, si, ei} = editCtx;
-  const ex = GYM[dow].sessions[si].ex[ei];
+  const G = planActual();
+  const ex = G[dow].sessions[si].ex[ei];
   if(!confirm('¿Eliminar "'+ex.n+'" de la rutina?')) return;
-  GYM[dow].sessions[si].ex.splice(ei, 1);
+  G[dow].sessions[si].ex.splice(ei, 1);
   saveRoutine();
   closeEdit();
   refreshGym();
@@ -1270,7 +1416,7 @@ function deleteEx(){
 
 function moveEx(dow, si, ei, dir, e){
   if(e) e.stopPropagation();
-  const list = GYM[dow].sessions[si].ex;
+  const list = planActual()[dow].sessions[si].ex;
   const to = ei + dir;
   if(to < 0 || to >= list.length) return;
   const [item] = list.splice(ei, 1);
@@ -1283,7 +1429,7 @@ function moveEx(dow, si, ei, dir, e){
 // ── BLOQUES ──
 function moveSess(dow, si, dir, e){
   if(e) e.stopPropagation();
-  const list = GYM[dow].sessions;
+  const list = planActual()[dow].sessions;
   const to = si + dir;
   if(to < 0 || to >= list.length) return;
   const [item] = list.splice(si, 1);
@@ -1294,25 +1440,27 @@ function moveSess(dow, si, dir, e){
 }
 
 function addBlock(dow){
-  if(!GYM[dow]) GYM[dow] = {label:'Entrenamiento', tipo:'', sessions:[]};
-  GYM[dow].sessions.push({
+  const G = planActual();
+  if(!G[dow]) G[dow] = {label:'Entrenamiento', tipo:'', sessions:[]};
+  G[dow].sessions.push({
     id:'blk_'+Date.now(),
-    type:'Bloque '+(GYM[dow].sessions.length+1),
+    type:'Bloque '+(G[dow].sessions.length+1),
     name:'Nuevo bloque',
     icon:'dumbbell', ic:'ic-gym',
     ex:[]
   });
   saveRoutine();
-  openSess.add(GYM[dow].sessions.length-1);
+  openSess.add(G[dow].sessions.length-1);
   refreshGym();
 }
 
 function deleteBlock(dow, si, e){
   if(e) e.stopPropagation();
-  const sess = GYM[dow].sessions[si];
+  const G = planActual();
+  const sess = G[dow].sessions[si];
   if(!confirm('¿Eliminar el bloque "'+sess.name+'" y todos sus ejercicios?')) return;
-  GYM[dow].sessions.splice(si, 1);
-  if(GYM[dow].sessions.length === 0) GYM[dow] = null;
+  G[dow].sessions.splice(si, 1);
+  if(G[dow].sessions.length === 0) G[dow] = null;
   saveRoutine();
   openSess = new Set();
   refreshGym();
@@ -1366,15 +1514,16 @@ function openNameModal(title, label, value, subLabel, subValue, showReset, sess)
 
 function openDayName(){
   const dow = curDayDate.getDay();
-  if(!GYM[dow]) return;
+  const G = planActual();
+  if(!G[dow]) return;
   nameCtx = {kind:'day', dow};
-  openNameModal('Actividad del día', 'Nombre de la actividad', GYM[dow].label,
-                'Descripción corta', GYM[dow].tipo, true, null);
+  openNameModal('Actividad del día', 'Nombre de la actividad', G[dow].label,
+                'Descripción corta', G[dow].tipo, true, null);
 }
 
 function openSessName(dow, si, e){
   if(e) e.stopPropagation();
-  const sess = GYM[dow].sessions[si];
+  const sess = planActual()[dow].sessions[si];
   nameCtx = {kind:'sess', dow, si};
   openNameModal('Nombre del bloque', 'Nombre', sess.name, 'Subtítulo', sess.type, false, sess);
 }
@@ -1392,11 +1541,12 @@ function saveName(){
   const v = document.getElementById('nameInp').value.trim();
   const sub = document.getElementById('nameSub').value.trim();
   if(!v){ document.getElementById('nameInp').focus(); return; }
+  const G = planActual();
   if(nameCtx.kind === 'day'){
-    GYM[nameCtx.dow].label = v;
-    GYM[nameCtx.dow].tipo = sub;
+    G[nameCtx.dow].label = v;
+    G[nameCtx.dow].tipo = sub;
   } else {
-    const sess = GYM[nameCtx.dow].sessions[nameCtx.si];
+    const sess = G[nameCtx.dow].sessions[nameCtx.si];
     sess.name = v;
     sess.type = sub;
     const emoji = document.getElementById('nameEmoji').value.trim();
@@ -1412,7 +1562,8 @@ function resetDay(){
   if(!nameCtx || nameCtx.kind !== 'day') return;
   const dow = nameCtx.dow;
   if(!confirm('¿Restaurar la rutina original de este día? Se pierden los cambios que hiciste.')) return;
-  GYM[dow] = GYM_DEFAULT[dow] ? JSON.parse(JSON.stringify(GYM_DEFAULT[dow])) : null;
+  const f = planInfo(curDayDate).fase;
+  PLAN[f][dow] = PLAN_DEFAULT[f][dow] ? JSON.parse(JSON.stringify(PLAN_DEFAULT[f][dow])) : null;
   saveRoutine();
   openSess = new Set();
   closeName();

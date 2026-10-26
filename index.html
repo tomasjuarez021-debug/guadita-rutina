@@ -51,7 +51,15 @@
   --fig-deco:#ecdfd1;
   --fig-idle:#e4d6c6;
   --fig-line:#fffaf4;
-  --fig-pelo:#8f6f5a;
+  --fig-pelo:#e3d4c4;
+  --m0a:#ebdfd2;--m0b:#dccbb9;
+  --h1a:#f6d6dc;--h1b:#ebbcc6;
+  --h2a:#eeb1be;--h2b:#df93a4;
+  --h3a:#e48b9f;--h3b:#cc6a82;
+  --h4a:#cf6680;--h4b:#a9475f;
+  --fib:rgba(90,50,40,0.13);
+  --grid:rgba(212,119,138,0.08);
+  --tech:#d4778a;
   --fig-trazo:rgba(120,85,60,0.22);
   color-scheme:light;
 }
@@ -84,7 +92,15 @@
   --fig-deco:#3d2e36;
   --fig-idle:#47363e;
   --fig-line:#251c21;
-  --fig-pelo:#6e5148;
+  --fig-pelo:#40313a;
+  --m0a:#4a3a42;--m0b:#3a2c34;
+  --h1a:#7c4c5c;--h1b:#673e4d;
+  --h2a:#a85a71;--h2b:#8c495e;
+  --h3a:#d27189;--h3b:#b25670;
+  --h4a:#ee8ea4;--h4b:#d26a85;
+  --fib:rgba(0,0,0,0.22);
+  --grid:rgba(232,141,160,0.07);
+  --tech:#e88da0;
   --fig-trazo:rgba(240,190,205,0.16);
   color-scheme:dark;
 }
@@ -496,20 +512,68 @@ body[data-view="gym"] .hoy-sel,body[data-view="postura"] .hoy-sel{display:block}
 .cp-stat{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 6px;text-align:center}
 .cp-stat b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--text);line-height:1}
 .cp-stat span{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
-.body-wrap{display:flex;gap:4px;justify-content:center}
+.body-wrap{display:flex;gap:4px;justify-content:center;transform-origin:0 0;will-change:transform}
 .body-col{flex:1;max-width:190px;text-align:center}
 .body-svg{width:100%;height:auto;display:block}
 .body-cap{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted2);margin-top:2px}
+.body-svg .sombra{fill:var(--text);opacity:.07}
 .body-svg .sil{fill:var(--fig-sil);stroke:var(--fig-trazo);stroke-width:.7}
-.body-svg .deco{fill:var(--fig-deco);stroke:var(--fig-trazo);stroke-width:.5}
-.body-svg .pelo{fill:var(--fig-pelo);stroke:none}
-.body-svg .m{stroke:var(--fig-line);stroke-width:.6;cursor:pointer;transition:fill 0.3s}
-.body-svg .m.h0{fill:var(--fig-idle)}
-.body-svg .m.h1,.rk-bar .h1{fill:#f1ccd3;background:#f1ccd3}
-.body-svg .m.h2,.rk-bar .h2{fill:#e7a6b4;background:#e7a6b4}
-.body-svg .m.h3,.rk-bar .h3{fill:#d97f93;background:#d97f93}
-.body-svg .m.h4,.rk-bar .h4{fill:#bf5771;background:#bf5771}
-.body-svg .m.sel{stroke:var(--text);stroke-width:1.1}
+.body-svg .deco{fill:var(--fig-deco);stroke:var(--fig-trazo);stroke-width:.5;pointer-events:none}
+.body-svg .pelo{fill:var(--fig-pelo);stroke:var(--fig-trazo);stroke-width:.6;pointer-events:none}
+.body-svg .m{stroke:var(--fig-line);stroke-width:.7;stroke-linejoin:round;cursor:pointer;transition:opacity 0.15s}
+.body-svg .m:active{opacity:.75}
+.body-svg .m.sel{stroke:var(--tech);stroke-width:1.2;stroke-dasharray:3 2;animation:hormigas 0.9s linear infinite}
+@keyframes hormigas{to{stroke-dashoffset:-10}}
+.body-svg .fb{pointer-events:none}
+.h1{--c:var(--h1b)}.h2{--c:var(--h2b)}.h3{--c:var(--h3b)}.h4{--c:var(--h4b)}.h0{--c:var(--m0b)}
+.rk-bar i,.cp-ley i,.tip-hd>i,.tip-lv i{background:var(--c)}
+/* zona del mapa: grilla suave, esquinas, barrido y zoom */
+.body-zoom{position:relative;overflow:hidden;border-radius:14px;touch-action:pan-y;user-select:none;-webkit-user-select:none;padding:8px 0 4px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;background-position:-1px -1px}
+.body-zoom.zoomed{touch-action:none}
+.body-zoom::before{content:'';position:absolute;inset:6px;pointer-events:none;z-index:4;opacity:0.6;
+  background:linear-gradient(var(--tech),var(--tech)) top left/14px 1.5px no-repeat,linear-gradient(var(--tech),var(--tech)) top left/1.5px 14px no-repeat,
+             linear-gradient(var(--tech),var(--tech)) top right/14px 1.5px no-repeat,linear-gradient(var(--tech),var(--tech)) top right/1.5px 14px no-repeat,
+             linear-gradient(var(--tech),var(--tech)) bottom left/14px 1.5px no-repeat,linear-gradient(var(--tech),var(--tech)) bottom left/1.5px 14px no-repeat,
+             linear-gradient(var(--tech),var(--tech)) bottom right/14px 1.5px no-repeat,linear-gradient(var(--tech),var(--tech)) bottom right/1.5px 14px no-repeat}
+.body-zoom::after{content:'';position:absolute;left:0;right:0;top:0;height:46px;pointer-events:none;z-index:3;opacity:0;
+  background:linear-gradient(180deg,transparent,var(--rose-dim) 70%,var(--rose2) 98%,transparent)}
+.body-zoom.scan::after{animation:barrido 1.3s ease-out 1}
+@keyframes barrido{0%{opacity:.9;transform:translateY(-46px)}85%{opacity:.9}100%{opacity:0;transform:translateY(440px)}}
+.hud-tag{position:absolute;left:14px;bottom:30px;transform:rotate(-90deg);transform-origin:left bottom;white-space:nowrap;z-index:4;font-size:8px;font-weight:700;letter-spacing:1.4px;color:var(--tech);opacity:.75;pointer-events:none;text-transform:uppercase}
+.zoom-ctl{position:absolute;right:8px;bottom:26px;display:flex;flex-direction:column;gap:6px;z-index:5}
+.zoom-ctl button{width:32px;height:32px;border-radius:10px;border:1px solid var(--border2);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.zoom-ctl .ic{width:15px;height:15px;stroke-width:2.2}
+.zoom-ctl .zoom-0{display:none}
+.body-zoom.zoomed .zoom-0{display:flex}
+/* tarjeta flotante */
+.tip{position:absolute;z-index:10;width:min(250px,calc(100% - 12px));padding:11px 12px 10px;border-radius:14px;background:var(--pop);border:1px solid var(--border2);box-shadow:var(--shadow);animation:tipIn 0.16s ease both}
+.tip[hidden]{display:none}
+.tip::after{content:'';position:absolute;left:calc(var(--ax,50%) - 6px);bottom:-6px;width:12px;height:12px;background:var(--pop);border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);transform:rotate(45deg)}
+.tip.abajo::after{bottom:auto;top:-6px;transform:rotate(225deg)}
+@keyframes tipIn{from{opacity:0;transform:translateY(4px) scale(0.97)}to{opacity:1;transform:none}}
+.tip-hd{display:flex;align-items:flex-start;gap:8px}
+.tip-hd>i{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.tip-tt{flex:1;min-width:0}
+.tip-tt b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:var(--text);line-height:1.15}
+.tip-tt small{display:block;font-size:10px;color:var(--muted);font-weight:600;margin-top:1px}
+.tip-x{border:none;background:none;color:var(--muted2);padding:2px;cursor:pointer;display:flex}
+.tip-x .ic{width:14px;height:14px;stroke-width:2.2}
+.tip p{font-size:11.5px;line-height:1.5;color:var(--muted);margin-top:6px}
+.tip-ft{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.tip-lv{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--muted)}
+.tip-lv i{width:6px;height:6px;border-radius:50%}
+.tip-more{display:inline-flex;align-items:center;gap:3px;border:none;background:none;color:var(--rose);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:0}
+.tip-more .ic{width:12px;height:12px;stroke-width:2.4}
+/* retícula que señala */
+.reticle{position:absolute;width:54px;height:54px;margin:-27px 0 0 -27px;pointer-events:none;z-index:6;color:var(--tech);animation:fijar 0.35s ease-out both}
+.reticle[hidden]{display:none}
+.reticle svg{width:100%;height:100%;overflow:visible}
+.reticle .r1{fill:none;stroke:currentColor;stroke-width:1.2;stroke-dasharray:5 4;transform-origin:27px 27px;animation:girar 3s linear infinite}
+.reticle .r2{fill:none;stroke:currentColor;stroke-width:1.5}
+.reticle .r3{fill:currentColor}
+@keyframes girar{to{transform:rotate(360deg)}}
+@keyframes fijar{from{transform:scale(1.8);opacity:0}to{transform:none;opacity:1}}
 .cp-ley{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:10px;font-size:8px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
 .cp-ley i{width:16px;height:6px;border-radius:3px;display:inline-block}
 .cp-hint{font-size:9px;color:var(--muted2);text-align:center;margin-top:8px}
@@ -585,12 +649,22 @@ body[data-view="gym"] .hoy-sel,body[data-view="postura"] .hoy-sel{display:block}
         </div>
       </div>
       <div class="cp-stats" id="cpStats"></div>
-      <div class="body-wrap">
-        <div class="body-col"><div id="bodyF"></div><div class="body-cap">Frente</div></div>
-        <div class="body-col"><div id="bodyB"></div><div class="body-cap">Espalda</div></div>
+      <div class="body-zoom" id="bodyZoom">
+        <div class="body-wrap" id="bodyWrap">
+          <div class="body-col"><div id="bodyF"></div><div class="body-cap">Frente</div></div>
+          <div class="body-col"><div id="bodyB"></div><div class="body-cap">Espalda</div></div>
+        </div>
+        <div class="zoom-ctl">
+          <button onclick="zoomBtn(1)" aria-label="Acercar"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.6v12.8M5.6 12h12.8"/></svg></button>
+          <button onclick="zoomBtn(-1)" aria-label="Alejar"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.6 12h12.8"/></svg></button>
+          <button class="zoom-0" onclick="zoomBtn(0)" aria-label="Ver cuerpo entero"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        </div>
+        <div class="tip" id="bodyTip" role="dialog" hidden></div>
+        <div class="reticle" id="bodyRet" hidden><svg viewBox="0 0 54 54"><circle class="r1" cx="27" cy="27" r="22"/><path class="r2" d="M27 1v9M27 44v9M1 27h9M44 27h9"/><circle class="r3" cx="27" cy="27" r="2"/></svg></div>
+        <div class="hud-tag" id="hudTag"></div>
       </div>
-      <div class="cp-ley"><span>Poco</span><i style="background:#f1ccd3"></i><i style="background:#e7a6b4"></i><i style="background:#d97f93"></i><i style="background:#bf5771"></i><span>Mucho</span></div>
-      <div class="cp-hint">Tocá un músculo para ver qué hace y qué ejercicios lo trabajan</div>
+      <div class="cp-ley"><span>Poco</span><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h4"></i><span>Mucho</span></div>
+      <div class="cp-hint">Tocá un músculo para ver qué hace · pellizcá o tocá dos veces para hacer zoom</div>
     </div>
     <div class="cp-det" id="cpDet" hidden></div>
     <button class="rank-tog" id="cpRankTog" onclick="togRank()"><span>Músculos del día</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 9.6l5.4 5.4 5.4-5.4"/></svg></button>
@@ -1096,6 +1170,7 @@ function init() {
   buildDays();
   renderDay(curDayDate);
   renderCuerpo();
+  setTimeout(escanear, 200);
   ponerNombre();
   if(!perfilCargado()) abrirBienvenida();
 }
@@ -1359,7 +1434,7 @@ function fmt(s){const m=Math.floor(s/60);const sec=s%60;return m+':'+(sec<10?'0'
 // ── NAV ──
 function sw(v){
   document.body.dataset.view = v;
-  if(v==='cuerpo') renderCuerpo();
+  if(v==='cuerpo'){ renderCuerpo(); setTimeout(escanear, 60); }
   if(v==='postura') renderPostura(curDayDate);
   if(v==='progreso') renderProgreso();
   if(v==='perfil') renderPerfil();
@@ -2137,22 +2212,57 @@ function volumenMuscular(dias){
 const OBJ_MUSC = {dia: 8, semana: 18};
 function nivelHeat(v){ if(!v || v <= 0) return 0; if(v < .25) return 1; if(v < .5) return 2; if(v < .8) return 3; return 4; }
 
+// Ángulo de las fibras de cada músculo (lado izquierdo de la figura; el
+// derecho se espeja). Se dibujan como un rayado suave encima del color.
+const FIB = {pecho:-22, hombro:-65, hombroPost:65, biceps:-84, triceps:-84, antebrazo:-75, abdomen:90, oblicuo:-58,
+             trapecio:-30, dorsal:-55, lumbar:90, gluteo:-30, cuadriceps:-82, isquios:-86, aductor:-65, gemelo:-88, tibial:-85, cuello:-70};
+const EJE = {frente:107, espalda:129};
+function fibId(a){ return 'fb' + String(a).replace('-', 'n'); }
+function crearDefs(){
+  if(document.getElementById('mIdle')) return;
+  const ang = new Set();
+  Object.values(FIB).forEach(a => { ang.add(a); ang.add(-a); });
+  // volumen: un degradé radial por nivel; los colores salen de las variables del tema
+  const grad = (id, a, b) => `<radialGradient id="${id}" cx="55%" cy="26%" r="85%"><stop offset="0" style="stop-color:var(${a})"/><stop offset="1" style="stop-color:var(${b})"/></radialGradient>`;
+  let h = grad('mIdle', '--m0a', '--m0b') + [1, 2, 3, 4].map(n => grad('mH' + n, `--h${n}a`, `--h${n}b`)).join('');
+  ang.forEach(a => {
+    h += `<pattern id="${fibId(a)}" patternUnits="userSpaceOnUse" width="2.6" height="2.6" patternTransform="rotate(${a})">`
+       + `<rect width="2.6" height=".8" style="fill:var(--fib)"/></pattern>`;
+  });
+  document.body.insertAdjacentHTML('afterbegin', `<svg class="svg-defs" width="0" height="0" aria-hidden="true"><defs>${h}</defs></svg>`);
+}
+// lado de una pieza: la primera coordenada del trazo alcanza
+const ladoDe = (d, vista) => parseFloat(d.slice(1)) < EJE[vista] ? 1 : -1;
+
+const NIVEL_TXT = ['Sin trabajo', 'Poco', 'Moderado', 'Alto', 'Al máximo'];
+const GRUPO = {pecho:'Torso', abdomen:'Core', oblicuo:'Core', lumbar:'Core', trapecio:'Espalda', dorsal:'Espalda', cuello:'Cuello',
+  hombro:'Hombro', hombroPost:'Hombro', biceps:'Brazo', triceps:'Brazo', antebrazo:'Brazo',
+  gluteo:'Cadera', aductor:'Pierna', cuadriceps:'Pierna', isquios:'Pierna', gemelo:'Pierna', tibial:'Pierna'};
+
 function figuraSVG(vista, vol){
   const F = FEM[vista], obj = OBJ_MUSC[rangoCuerpo];
-  let o = `<path class="sil" d="${F.sil}"/>`;
+  let o = `<ellipse cx="${EJE[vista]}" cy="478" rx="58" ry="5" class="sombra"/><path class="sil" d="${F.sil}"/>`;
   F.deco.forEach(p => { o += `<path class="${p.pelo ? 'pelo' : 'deco'}" d="${p.d}"/>`; });
   for(const [id, piezas] of Object.entries(F.musc)){
     const n = nivelHeat((vol[id] || 0) / obj);
     const sel = selMusc === id ? ' sel' : '';
-    piezas.forEach(d => { o += `<path class="m h${n}${sel}" onclick="tocarMusc('${id}')" d="${d}"/>`; });
+    let g = '';
+    piezas.forEach(d => {
+      g += `<path class="m${sel}" onclick="tocarMusc('${id}')" d="${d}"/>`
+         + `<path class="fb" fill="url(#${fibId(FIB[id] * ladoDe(d, vista))})" d="${d}"/>`;
+    });
+    o += `<g fill="url(#${n ? 'mH' + n : 'mIdle'})">${g}</g>`;
   }
   const vb = vista === 'frente' ? '-6 6 226 480' : '16 6 226 480';
   return `<svg viewBox="${vb}" class="body-svg" role="img" aria-label="Cuerpo, ${vista}">${o}</svg>`;
 }
 
+let _ultVol = null;
 function renderCuerpo(){
+  crearDefs();
   const dt = curDayDate, pi = planInfo(dt), g = getGym(dt);
-  const {vol, ejs, series, nEj} = volumenMuscular(diasDelRango());
+  const R = volumenMuscular(diasDelRango()), {vol, ejs, series, nEj} = R;
+  _ultVol = R;
   const sem = pi.estado === 'activo' ? `Semana ${pi.semana} · ${FASES[pi.fase].nombre}`
             : pi.estado === 'antes' ? 'Antes del plan' : 'Plan terminado';
   document.getElementById('cpEyebrow').textContent = sem;
@@ -2165,22 +2275,24 @@ function renderCuerpo(){
       `<div class="cp-stat"><b>${nEj}</b><span>ejercicios</span></div>`
     + `<div class="cp-stat"><b>${series}</b><span>series</span></div>`
     + `<div class="cp-stat"><b>${trabajados}</b><span>músculos</span></div>`;
+  document.getElementById('hudTag').textContent = `${rangoCuerpo === 'dia' ? 'Día' : 'Semana'} · ${trabajados}/${Object.keys(MUSC).length} músculos`;
 
   document.getElementById('bodyF').innerHTML = figuraSVG('frente', vol);
   document.getElementById('bodyB').innerHTML = figuraSVG('espalda', vol);
 
-  // detalle del músculo tocado
+  // detalle del músculo: qué ejercicios lo trabajaron
   const det = document.getElementById('cpDet');
-  if(selMusc){
+  if(selMusc && detAbierto){
     const lista = (ejs[selMusc] || []).slice().sort((a, b) => b.f - a.f);
-    const v = Math.round((vol[selMusc] || 0) * 10) / 10;
+    const v = r1(vol[selMusc] || 0);
     det.hidden = false;
     det.innerHTML = `<div class="cp-det-hd"><div><div class="cp-det-nm">${MUSC[selMusc]}</div>`
       + `<div class="cp-det-sub">${v ? v + ' series efectivas ' + (rangoCuerpo === 'dia' ? 'hoy' : 'esta semana') : 'Sin trabajo en este ' + (rangoCuerpo === 'dia' ? 'día' : 'rango')}</div></div>`
-      + `<button class="cp-x" onclick="tocarMusc(null)" aria-label="Cerrar">${icon('close')}</button></div>`
+      + `<button class="cp-x" onclick="cerrarTip()" aria-label="Cerrar">${icon('close')}</button></div>`
       + `<div class="cp-det-txt">${MUSC_DESC[selMusc]}</div>`
       + (lista.length ? `<div class="cp-ejs">${lista.map(e =>
-          `<div class="cp-ej"><span>${esc(e.n)}</span><em>${rangoCuerpo === 'semana' ? e.dia + ' · ' : ''}${e.f >= .8 ? 'principal' : 'secundario'}</em></div>`).join('')}</div>` : '');
+          `<div class="cp-ej"><span>${esc(e.n)}</span><em>${rangoCuerpo === 'semana' ? e.dia + ' · ' : ''}${e.f >= .8 ? 'principal' : 'secundario'}</em></div>`).join('')}</div>`
+        : `<div class="cp-det-txt" style="margin-top:8px">Ningún ejercicio ${rangoCuerpo === 'dia' ? 'de este día' : 'de esta semana'} lo trabaja.</div>`);
   } else {
     det.hidden = true;
     det.innerHTML = '';
@@ -2195,18 +2307,198 @@ function renderCuerpo(){
   const rk = document.getElementById('cpRank');
   rk.hidden = !rankOpen || !orden.length;
   rk.innerHTML = orden.map(id =>
-    `<div class="rk-row" onclick="tocarMusc('${id}')"><span class="rk-nm">${MUSC[id]}</span>`
+    `<div class="rk-row" onclick="senalar('${id}')"><span class="rk-nm">${MUSC[id]}</span>`
     + `<span class="rk-bar"><i class="h${nivelHeat(vol[id] / OBJ_MUSC[rangoCuerpo])}" style="width:${Math.round(vol[id] / max * 100)}%"></i></span>`
-    + `<span class="rk-v">${Math.round(vol[id] * 10) / 10}</span></div>`).join('');
+    + `<span class="rk-v">${r1(vol[id])}</span></div>`).join('');
 }
 
-function setRango(r){ rangoCuerpo = r; renderCuerpo(); }
-function tocarMusc(id){
-  selMusc = id && selMusc !== id ? id : null;
-  renderCuerpo();
-  if(selMusc) document.getElementById('cpDet').scrollIntoView({behavior:'smooth', block:'nearest'});
-}
+function setRango(r){ rangoCuerpo = r; renderCuerpo(); if(selMusc) apuntarSel(); escanear(); }
 function togRank(){ rankOpen = !rankOpen; renderCuerpo(); }
+
+// ── TARJETA FLOTANTE ──
+let _tapXY = null;            // último toque en el mapa, relativo al contenedor
+let detAbierto = false;       // lista de ejercicios del músculo, debajo del mapa
+const zonaZ = () => document.getElementById('bodyZoom');
+function tocarMusc(id){
+  selMusc = selMusc === id ? null : id;
+  detAbierto = false;
+  renderCuerpo();
+  if(selMusc) mostrarTip(); else ocultarTip();
+}
+function mostrarTip(){
+  const tip = document.getElementById('bodyTip'), zona = zonaZ();
+  if(!selMusc) return;
+  const v = (_ultVol.vol[selMusc] || 0), n = nivelHeat(v / OBJ_MUSC[rangoCuerpo]);
+  tip.innerHTML = `<div class="tip-hd"><i class="h${n}"></i><div class="tip-tt"><b>${MUSC[selMusc]}</b><small>Músculo · ${GRUPO[selMusc]}</small></div>`
+    + `<button class="tip-x" onclick="cerrarTip()" aria-label="Cerrar">${icon('close')}</button></div>`
+    + `<p>${MUSC_DESC[selMusc]}</p>`
+    + `<div class="tip-ft"><span class="tip-lv"><i class="h${n}"></i>${NIVEL_TXT[n]} · ${r1(v)} series</span>`
+    + `<button class="tip-more" onclick="verEjercicios()">Qué lo trabajó ${icon('arrowR')}</button></div>`;
+  tip.hidden = false;
+  const W = zona.clientWidth, H = zona.clientHeight, tw = tip.offsetWidth, th = tip.offsetHeight;
+  const p = _tapXY || {x: W/2, y: H/2};
+  const left = Math.max(6, Math.min(W - tw - 6, p.x - tw/2));
+  const arriba = p.y - th - 14 >= 4;
+  tip.style.left = left + 'px';
+  tip.style.top = (arriba ? p.y - th - 14 : Math.min(H - th - 4, p.y + 14)) + 'px';
+  tip.style.setProperty('--ax', Math.max(14, Math.min(tw - 14, p.x - left)) + 'px');
+  tip.classList.toggle('abajo', !arriba);
+  // retícula sobre el punto tocado
+  const ret = document.getElementById('bodyRet');
+  ret.hidden = true; void ret.offsetWidth;
+  ret.style.left = p.x + 'px'; ret.style.top = p.y + 'px';
+  ret.hidden = false;
+}
+function ocultarTip(){
+  document.getElementById('bodyTip').hidden = true;
+  document.getElementById('bodyRet').hidden = true;
+}
+function cerrarTip(){
+  ocultarTip();
+  if(selMusc){ selMusc = null; detAbierto = false; renderCuerpo(); }
+}
+function verEjercicios(){
+  ocultarTip();
+  detAbierto = true;
+  renderCuerpo();
+  document.getElementById('cpDet').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+// señalar desde el ranking: vuelve al cuerpo entero y apunta al músculo
+function apuntarSel(){
+  const z = zonaZ(), el = z.querySelector('.m.sel');
+  if(!el){ ocultarTip(); return; }
+  const r = el.getBoundingClientRect(), zr = z.getBoundingClientRect();
+  _tapXY = {x: r.left + r.width/2 - zr.left, y: r.top + r.height/2 - zr.top};
+  mostrarTip();
+}
+function senalar(id){
+  Z.s = 1; Z.x = 0; Z.y = 0; aplicarZoom(false);
+  selMusc = id; detAbierto = false;
+  renderCuerpo();
+  zonaZ().scrollIntoView({block:'center', behavior:'smooth'});
+  setTimeout(apuntarSel, 420);
+}
+function escanear(){
+  const z = zonaZ();
+  z.classList.remove('scan'); void z.offsetWidth; z.classList.add('scan');
+}
+document.addEventListener('click', e => {
+  const tip = document.getElementById('bodyTip');
+  if(!tip || tip.hidden || !e.target.isConnected) return;
+  if(e.target.closest('#bodyTip') || e.target.closest('.body-svg [onclick]')) return;
+  cerrarTip();
+});
+
+// ── ZOOM DEL MAPA ──
+// Pellizcar o doble toque para acercar, arrastrar para moverse; botones + − y
+// volver. Sin zoom, el dedo sigue desplazando la página normalmente.
+const Z = {s:1, x:0, y:0};
+let _bloqClick = 0;
+function limitarZ(){
+  const z = zonaZ(), W = z.clientWidth, H = z.clientHeight;
+  Z.s = Math.min(4, Math.max(1, Z.s));
+  Z.x = Math.min(0, Math.max(W - W*Z.s, Z.x));
+  Z.y = Math.min(0, Math.max(H - H*Z.s, Z.y));
+}
+function aplicarZoom(anim){
+  limitarZ();
+  const w = document.getElementById('bodyWrap');
+  w.style.transition = anim ? 'transform 0.25s ease' : 'none';
+  w.style.transform = `translate(${Z.x}px,${Z.y}px) scale(${Z.s})`;
+  zonaZ().classList.toggle('zoomed', Z.s > 1.01);
+  ocultarTip();
+}
+function zoomEn(px, py, s){
+  s = Math.min(4, Math.max(1, s));
+  const k = s / Z.s;
+  Z.x = px - (px - Z.x) * k;
+  Z.y = py - (py - Z.y) * k;
+  Z.s = s;
+}
+function zoomBtn(d){
+  const z = zonaZ();
+  if(d === 0){ Z.s = 1; Z.x = 0; Z.y = 0; }
+  else zoomEn(z.clientWidth/2, z.clientHeight/2, Z.s * (d > 0 ? 1.6 : 1/1.6));
+  aplicarZoom(true);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const z = zonaZ();
+  const rel = (cx, cy) => { const r = z.getBoundingClientRect(); return {x: cx - r.left, y: cy - r.top}; };
+  const dist = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  let g = null, ultimo = {t:0, x:0, y:0};
+  z.addEventListener('touchstart', e => {
+    if(e.touches.length === 2){
+      const [a, b] = e.touches;
+      const m = rel((a.clientX + b.clientX)/2, (a.clientY + b.clientY)/2);
+      g = {modo:'pinch', d0: dist(a, b), s0: Z.s, cx: (m.x - Z.x)/Z.s, cy: (m.y - Z.y)/Z.s};
+      e.preventDefault();
+    } else if(e.touches.length === 1){
+      const t = e.touches[0], ahora = Date.now();
+      if(ahora - ultimo.t < 300 && Math.hypot(t.clientX - ultimo.x, t.clientY - ultimo.y) < 30){
+        const p = rel(t.clientX, t.clientY);
+        if(Z.s > 1.01){ Z.s = 1; Z.x = 0; Z.y = 0; } else zoomEn(p.x, p.y, 2.5);
+        aplicarZoom(true);
+        _bloqClick = ahora;
+        e.preventDefault();
+        g = null; ultimo.t = 0;
+        return;
+      }
+      ultimo = {t: ahora, x: t.clientX, y: t.clientY};
+      g = {modo:'pan', px: t.clientX, py: t.clientY, x0: Z.x, y0: Z.y, mov: false};
+    }
+  }, {passive:false});
+  z.addEventListener('touchmove', e => {
+    if(!g) return;
+    if(g.modo === 'pinch' && e.touches.length === 2){
+      e.preventDefault();
+      const [a, b] = e.touches;
+      const m = rel((a.clientX + b.clientX)/2, (a.clientY + b.clientY)/2);
+      Z.s = Math.min(4, Math.max(1, g.s0 * dist(a, b) / g.d0));
+      Z.x = m.x - g.cx * Z.s;
+      Z.y = m.y - g.cy * Z.s;
+      g.mov = true;
+      aplicarZoom(false);
+    } else if(g.modo === 'pan' && Z.s > 1.01 && e.touches.length === 1){
+      const t = e.touches[0], dx = t.clientX - g.px, dy = t.clientY - g.py;
+      if(!g.mov && Math.hypot(dx, dy) < 5) return;
+      e.preventDefault();
+      g.mov = true;
+      Z.x = g.x0 + dx; Z.y = g.y0 + dy;
+      aplicarZoom(false);
+    }
+  }, {passive:false});
+  z.addEventListener('touchend', e => {
+    if(g && g.mov) _bloqClick = Date.now();
+    if(e.touches.length === 1){
+      const t = e.touches[0];
+      g = {modo:'pan', px: t.clientX, py: t.clientY, x0: Z.x, y0: Z.y, mov: true};
+    } else if(!e.touches.length) g = null;
+  });
+  z.addEventListener('gesturestart', e => e.preventDefault());
+  // mouse y trackpad
+  let md = null;
+  z.addEventListener('mousedown', e => { if(Z.s > 1.01) md = {px: e.clientX, py: e.clientY, x0: Z.x, y0: Z.y, mov: false}; });
+  window.addEventListener('mousemove', e => {
+    if(!md) return;
+    const dx = e.clientX - md.px, dy = e.clientY - md.py;
+    if(!md.mov && Math.hypot(dx, dy) < 5) return;
+    md.mov = true; Z.x = md.x0 + dx; Z.y = md.y0 + dy; aplicarZoom(false);
+  });
+  window.addEventListener('mouseup', () => { if(md && md.mov) _bloqClick = Date.now(); md = null; });
+  z.addEventListener('wheel', e => {
+    if(!e.ctrlKey) return;
+    e.preventDefault();
+    const p = rel(e.clientX, e.clientY);
+    zoomEn(p.x, p.y, Z.s * Math.exp(-e.deltaY * 0.01));
+    aplicarZoom(false);
+  }, {passive:false});
+  // un arrastre no cuenta como toque; un toque guarda dónde fue
+  z.addEventListener('click', e => {
+    if(Date.now() - _bloqClick < 350){ e.stopPropagation(); e.preventDefault(); return; }
+    _tapXY = rel(e.clientX, e.clientY);
+  }, true);
+  window.addEventListener('resize', () => aplicarZoom(false));
+});
 
 init();
 </script>

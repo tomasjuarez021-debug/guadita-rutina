@@ -63,45 +63,45 @@
   --fig-trazo:rgba(120,85,60,0.22);
   color-scheme:light;
 }
-/* noche: ciruela profunda, mismo rosa */
+/* noche: celeste oscuro, mismo rosa */
 :root[data-theme="dark"]{
-  --bg:#1b1418;
-  --card:#251c21;
-  --card2:#2e2329;
-  --card3:#3a2d34;
-  --rose:#e88da0;
-  --rose2:#f2b1bf;
-  --rose-dim:rgba(232,141,160,0.14);
-  --sage:#9cbb98;
-  --sage2:#b4cfb0;
-  --sage-dim:rgba(156,187,152,0.14);
-  --ochre:#e2b56a;
-  --ochre-dim:rgba(226,181,106,0.15);
-  --green:#6cc093;
-  --green-dim:rgba(108,192,147,0.15);
-  --text:#f5e9ec;
-  --muted:#b39aa4;
-  --muted2:#7d6872;
-  --border:rgba(240,190,205,0.10);
-  --border2:rgba(240,190,205,0.18);
-  --glass:rgba(27,20,24,0.94);
-  --ov:rgba(10,5,8,0.62);
-  --pop:#2e2329;
+  --bg:#131c25;
+  --card:#1a2632;
+  --card2:#213040;
+  --card3:#2b3c4e;
+  --rose:#ee96a9;
+  --rose2:#f6b9c6;
+  --rose-dim:rgba(238,150,169,0.14);
+  --sage:#9cc3a8;
+  --sage2:#b6d6bf;
+  --sage-dim:rgba(156,195,168,0.14);
+  --ochre:#e6bb72;
+  --ochre-dim:rgba(230,187,114,0.15);
+  --green:#6fc69a;
+  --green-dim:rgba(111,198,154,0.15);
+  --text:#eaf2f8;
+  --muted:#9db0c0;
+  --muted2:#62778a;
+  --border:rgba(170,210,240,0.10);
+  --border2:rgba(170,210,240,0.18);
+  --glass:rgba(19,28,37,0.94);
+  --ov:rgba(5,10,16,0.62);
+  --pop:#213040;
   --shadow:0 12px 34px rgba(0,0,0,0.45);
-  --fig-sil:#33262d;
-  --fig-deco:#3d2e36;
-  --fig-idle:#47363e;
-  --fig-line:#251c21;
-  --fig-pelo:#40313a;
-  --m0a:#4a3a42;--m0b:#3a2c34;
-  --h1a:#7c4c5c;--h1b:#673e4d;
-  --h2a:#a85a71;--h2b:#8c495e;
-  --h3a:#d27189;--h3b:#b25670;
-  --h4a:#ee8ea4;--h4b:#d26a85;
+  --fig-sil:#243445;
+  --fig-deco:#2c3e51;
+  --fig-idle:#33475b;
+  --fig-line:#1a2632;
+  --fig-pelo:#2e4255;
+  --m0a:#3a5066;--m0b:#2e4256;
+  --h1a:#a3879f;--h1b:#8c718a;
+  --h2a:#c88aa1;--h2b:#b2728b;
+  --h3a:#e690a5;--h3b:#cf7690;
+  --h4a:#f8a9bb;--h4b:#e88aa2;
   --fib:rgba(0,0,0,0.22);
-  --grid:rgba(232,141,160,0.07);
-  --tech:#e88da0;
-  --fig-trazo:rgba(240,190,205,0.16);
+  --grid:rgba(160,205,240,0.06);
+  --tech:#ee96a9;
+  --fig-trazo:rgba(170,210,240,0.16);
   color-scheme:dark;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -1733,7 +1733,7 @@ function temaActual(){ return document.documentElement.dataset.theme === 'dark' 
 function aplicarTema(t){
   document.documentElement.dataset.theme = t;
   const m = document.querySelector('meta[name="theme-color"]');
-  if(m) m.content = t === 'dark' ? '#1b1418' : '#faf6f0';
+  if(m) m.content = t === 'dark' ? '#131c25' : '#faf6f0';
   const b = document.getElementById('temaBtn');
   if(b){
     b.innerHTML = icon(t === 'dark' ? 'sun' : 'moon');

@@ -1,6 +1,6 @@
 {
-  "name": "Rutina Integral Guadalupe Ruiz",
-  "short_name": "Rutina Guada",
+  "name": "Rutina Integral",
+  "short_name": "Rutina Integral",
   "description": "Rutina integral de gimnasio, movilidad y postura",
   "start_url": "./index.html",
   "display": "standalone",
